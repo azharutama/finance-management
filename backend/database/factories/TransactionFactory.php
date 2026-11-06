@@ -41,4 +41,3 @@ class TransactionFactory extends Factory
         ]);
     }
 }
-

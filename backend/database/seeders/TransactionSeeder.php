@@ -17,25 +17,33 @@ class TransactionSeeder extends Seeder
 
         $admin = User::where('email', 'admin@example.com')->first();
         $coas = ChartOfAccount::pluck('id', 'code');
-        $year = date('Y');
 
+        // Seed data for 2022 (matching the exact spreadsheet specification)
         $sampleTransactions = [
-            // January
-            ['date' => "{$year}-01-01", 'coa' => '401', 'description' => 'Gaji Di Perusahaan A', 'debit' => 0, 'credit' => 5000000],
-            ['date' => "{$year}-01-02", 'coa' => '402', 'description' => 'Gaji Ketum', 'debit' => 0, 'credit' => 7000000],
-            ['date' => "{$year}-01-10", 'coa' => '602', 'description' => 'Bensin Mobil', 'debit' => 25000, 'credit' => 0],
-            ['date' => "{$year}-01-12", 'coa' => '604', 'description' => 'Makan Siang Kantor', 'debit' => 45000, 'credit' => 0],
-            ['date' => "{$year}-01-15", 'coa' => '601', 'description' => 'SPP Anak Januari', 'debit' => 750000, 'credit' => 0],
-            // February
-            ['date' => "{$year}-02-01", 'coa' => '401', 'description' => 'Gaji Di Perusahaan A', 'debit' => 0, 'credit' => 5000000],
-            ['date' => "{$year}-02-02", 'coa' => '403', 'description' => 'Profit Trading Saham', 'debit' => 0, 'credit' => 1500000],
-            ['date' => "{$year}-02-08", 'coa' => '603', 'description' => 'Parkir Mall', 'debit' => 15000, 'credit' => 0],
-            ['date' => "{$year}-02-15", 'coa' => '605', 'description' => 'Belanja Bulanan Keluarga', 'debit' => 1200000, 'credit' => 0],
-            // March
-            ['date' => "{$year}-03-01", 'coa' => '401', 'description' => 'Gaji Di Perusahaan A', 'debit' => 0, 'credit' => 5000000],
-            ['date' => "{$year}-03-02", 'coa' => '402', 'description' => 'Gaji Ketum', 'debit' => 0, 'credit' => 7000000],
-            ['date' => "{$year}-03-10", 'coa' => '602', 'description' => 'Isi BBM Pertamax', 'debit' => 300000, 'credit' => 0],
-            ['date' => "{$year}-03-18", 'coa' => '604', 'description' => 'Makan Siang Tim', 'debit' => 175000, 'credit' => 0],
+            // 2022-01 (Salary: 12,000,000 | Other Income: 5,500,000 | Family: 500,000 | Transport: 200,000 | Meal: 150,000)
+            ['date' => '2022-01-01', 'coa' => '401', 'description' => 'Gaji Di Perusahaan A', 'debit' => 0, 'credit' => 5000000],
+            ['date' => '2022-01-02', 'coa' => '402', 'description' => 'Gaji Ketum', 'debit' => 0, 'credit' => 7000000],
+            ['date' => '2022-01-05', 'coa' => '403', 'description' => 'Profit Trading Januari', 'debit' => 0, 'credit' => 5500000],
+            ['date' => '2022-01-10', 'coa' => '602', 'description' => 'Bensin Anak', 'debit' => 25000, 'credit' => 0],
+            ['date' => '2022-01-12', 'coa' => '603', 'description' => 'Parkir & Tol Bulanan', 'debit' => 175000, 'credit' => 0],
+            ['date' => '2022-01-15', 'coa' => '601', 'description' => 'Biaya Sekolah Anak', 'debit' => 500000, 'credit' => 0],
+            ['date' => '2022-01-20', 'coa' => '604', 'description' => 'Makan Siang', 'debit' => 150000, 'credit' => 0],
+
+            // 2022-02 (Salary: 12,000,000 | Other Income: 6,000,000 | Family: 3,500,000 | Transport: 250,000 | Meal: 300,000)
+            ['date' => '2022-02-01', 'coa' => '401', 'description' => 'Gaji Di Perusahaan A', 'debit' => 0, 'credit' => 5000000],
+            ['date' => '2022-02-02', 'coa' => '402', 'description' => 'Gaji Ketum', 'debit' => 0, 'credit' => 7000000],
+            ['date' => '2022-02-05', 'coa' => '403', 'description' => 'Profit Trading Februari', 'debit' => 0, 'credit' => 6000000],
+            ['date' => '2022-02-10', 'coa' => '601', 'description' => 'Biaya Sekolah & Les', 'debit' => 3500000, 'credit' => 0],
+            ['date' => '2022-02-14', 'coa' => '602', 'description' => 'Bensin Operasional', 'debit' => 250000, 'credit' => 0],
+            ['date' => '2022-02-18', 'coa' => '605', 'description' => 'Makanan Pokok Bulanan', 'debit' => 300000, 'credit' => 0],
+
+            // 2022-03 (Salary: 12,000,000 | Other Income: 3,500,000 | Family: 4,500,000 | Transport: 225,000 | Meal: 175,000)
+            ['date' => '2022-03-01', 'coa' => '401', 'description' => 'Gaji Di Perusahaan A', 'debit' => 0, 'credit' => 5000000],
+            ['date' => '2022-03-02', 'coa' => '402', 'description' => 'Gaji Ketum', 'debit' => 0, 'credit' => 7000000],
+            ['date' => '2022-03-06', 'coa' => '403', 'description' => 'Profit Trading Maret', 'debit' => 0, 'credit' => 3500000],
+            ['date' => '2022-03-11', 'coa' => '601', 'description' => 'Biaya Sekolah Semester', 'debit' => 4500000, 'credit' => 0],
+            ['date' => '2022-03-15', 'coa' => '602', 'description' => 'Bensin & Parkir', 'debit' => 225000, 'credit' => 0],
+            ['date' => '2022-03-22', 'coa' => '604', 'description' => 'Makan Siang & Pokok', 'debit' => 175000, 'credit' => 0],
         ];
 
         foreach ($sampleTransactions as $tx) {
@@ -55,4 +63,3 @@ class TransactionSeeder extends Seeder
         }
     }
 }
-

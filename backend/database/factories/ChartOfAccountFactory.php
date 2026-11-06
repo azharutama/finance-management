@@ -23,4 +23,3 @@ class ChartOfAccountFactory extends Factory
         ];
     }
 }
-

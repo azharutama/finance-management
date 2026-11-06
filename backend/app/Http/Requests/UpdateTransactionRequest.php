@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Models\Category;
+use App\Models\ChartOfAccount;
+use App\Models\Transaction;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
+
+class UpdateTransactionRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()?->isAdmin() ?? false;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'date' => ['required', 'date_format:Y-m-d'],
+            'coa_id' => ['required', 'integer', 'exists:chart_of_accounts,id'],
+            'description' => ['required', 'string', 'max:255'],
+            'debit' => ['nullable', 'numeric', 'min:0', 'max:9999999999999.99'],
+            'credit' => ['nullable', 'numeric', 'min:0', 'max:9999999999999.99'],
+        ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'debit' => $this->input('debit') === null || $this->input('debit') === '' ? 0 : $this->input('debit'),
+            'credit' => $this->input('credit') === null || $this->input('credit') === '' ? 0 : $this->input('credit'),
+            'description' => is_string($this->input('description')) ? trim($this->input('description')) : $this->input('description'),
+        ]);
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                $debit = round((float) $this->input('debit', 0), 2);
+                $credit = round((float) $this->input('credit', 0), 2);
+
+                if ($debit <= 0 && $credit <= 0) {
+                    $validator->errors()->add('debit', 'Either debit or credit must be greater than zero.');
+
+                    return;
+                }
+
+                if ($debit > 0 && $credit > 0) {
+                    $validator->errors()->add('debit', 'Only one of debit or credit may be greater than zero in a single transaction.');
+
+                    return;
+                }
+
+                /** @var Transaction $transaction */
+                $transaction = $this->route('transaction');
+                $coa = ChartOfAccount::with('category')->find($this->input('coa_id'));
+
+                if (! $coa) {
+                    $validator->errors()->add('coa_id', 'The selected Chart of Account is invalid.');
+
+                    return;
+                }
+
+                if ((int) $coa->id !== (int) $transaction->coa_id && (! $coa->is_active || ($coa->category && ! $coa->category->is_active))) {
+                    $validator->errors()->add('coa_id', 'The selected Chart of Account is inactive and cannot be used for transactions.');
+
+                    return;
+                }
+
+                if ($coa->category) {
+                    if ($coa->category->type === Category::TYPE_INCOME && $debit > 0) {
+                        $validator->errors()->add('credit', 'Income category COA transactions must be recorded in Credit.');
+                    } elseif ($coa->category->type === Category::TYPE_EXPENSE && $credit > 0) {
+                        $validator->errors()->add('debit', 'Expense category COA transactions must be recorded in Debit.');
+                    }
+                }
+            },
+        ];
+    }
+}

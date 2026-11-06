@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -19,10 +18,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
         });
-
-        if (in_array(DB::getDriverName(), ['mysql', 'sqlite', 'pgsql'], true)) {
-            DB::statement("ALTER TABLE categories ADD CONSTRAINT chk_categories_type CHECK (type IN ('income', 'expense'))");
-        }
     }
 
     /**
@@ -33,4 +28,3 @@ return new class extends Migration
         Schema::dropIfExists('categories');
     }
 };
-

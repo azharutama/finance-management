@@ -26,10 +26,18 @@ class Transaction extends Model
         return [
             'date' => 'date:Y-m-d',
             'coa_id' => 'integer',
-            'debit' => 'decimal:2',
-            'credit' => 'decimal:2',
+            'debit' => 'float',
+            'credit' => 'float',
             'created_by' => 'integer',
         ];
+    }
+
+    /**
+     * @return BelongsTo<ChartOfAccount, $this>
+     */
+    public function coa(): BelongsTo
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'coa_id');
     }
 
     /**
@@ -48,4 +56,3 @@ class Transaction extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 }
-

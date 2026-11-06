@@ -4,8 +4,6 @@ namespace App\Helpers;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
@@ -20,10 +18,6 @@ class ApiResponse
         int $status = SymfonyResponse::HTTP_OK,
         ?array $meta = null
     ): JsonResponse {
-        if ($data instanceof JsonResource) {
-            $data = $data->resolve(request());
-        }
-
         return response()->json([
             'success' => true,
             'status' => $status,
@@ -69,18 +63,9 @@ class ApiResponse
      */
     public static function paginated(
         LengthAwarePaginator $paginator,
-        ?string $resourceClass = null,
         string $message = 'Data retrieved successfully.',
         array $extraMeta = []
     ): JsonResponse {
-        $items = $paginator->items();
-
-        if ($resourceClass !== null) {
-            /** @var AnonymousResourceCollection $collection */
-            $collection = $resourceClass::collection(collect($items));
-            $items = $collection->resolve(request());
-        }
-
         $meta = array_merge([
             'current_page' => $paginator->currentPage(),
             'per_page' => $paginator->perPage(),
@@ -88,7 +73,7 @@ class ApiResponse
             'last_page' => $paginator->lastPage(),
         ], $extraMeta);
 
-        return self::success($items, $message, SymfonyResponse::HTTP_OK, $meta);
+        return self::success($paginator->items(), $message, SymfonyResponse::HTTP_OK, $meta);
     }
 
     /**
@@ -224,4 +209,3 @@ class ApiResponse
         return self::error($message, SymfonyResponse::HTTP_GATEWAY_TIMEOUT);
     }
 }
-

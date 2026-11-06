@@ -46,4 +46,3 @@ class ChartOfAccount extends Model
         return $this->hasMany(Transaction::class, 'coa_id');
     }
 }
-

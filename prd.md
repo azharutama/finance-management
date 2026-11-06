@@ -4,7 +4,7 @@
 
 **Versi:** 1.1\
 **Status:** Draft -- siap menjadi acuan implementasi\
-**Stack:** Laravel REST API, Nuxt.js, Vue.js, TypeScript, Tailwind CSS,
+**Stack:** Laravel REST API, Maatwebsite Laravel Excel (`maatwebsite/excel`), Nuxt.js, Vue.js, TypeScript, Tailwind CSS,
 MySQL
 
 ------------------------------------------------------------------------
@@ -128,7 +128,7 @@ versi awal, sistem dapat dimulai dengan satu peran administrator apabila
 belum ada matriks peran lain.
 
 Aturan: - Setiap endpoint yang dilindungi harus memeriksa autentikasi. -
-Hak akses diperiksa di backend melalui middleware/policy/gate. -
+Hak akses diperiksa di backend melalui middleware atau Form Request. -
 Menyembunyikan tombol di frontend bukan mekanisme authorization. -
 Pengguna hanya boleh melakukan aksi sesuai hak aksesnya.
 
@@ -216,30 +216,23 @@ middleware. - **Controllers:** menerima request, memanggil service, dan
 mengembalikan response. Controller tidak menampung business logic
 kompleks. - **Form Requests:** menangani validasi input dan
 authorization request-level bila sesuai. - **Services:** menampung
-business logic dan orkestrasi proses bisnis. - **Models:**
-merepresentasikan entitas dan relasi Eloquent. -
-**Resources/Transformers:** menstandarkan bentuk data yang dikirim
-melalui API. - **Events/Listeners:** digunakan ketika ada proses
-lanjutan yang layak dipisahkan dari alur utama. - **Jobs/Queues:**
-digunakan untuk pekerjaan berat atau asynchronous, misalnya export besar
-atau notifikasi jika kelak dibutuhkan. - **Policies/Gates:** menangani
-authorization berbasis resource.
+business logic dan orkestrasi proses bisnis. - **Exports:** menangani
+format dan styling export Excel menggunakan `maatwebsite/excel`. - **Models:**
+merepresentasikan entitas dan relasi Eloquent. - **Helpers:** menyediakan
+helper terpusat seperti `ApiResponse`.
 
 Contoh struktur:
 
 ``` text
 backend/
 └── app/
+    ├── Exports/
+    ├── Helpers/
     ├── Http/
     │   ├── Controllers/Api/V1/
-    │   ├── Requests/
-    │   └── Resources/
+    │   └── Requests/
     ├── Models/
-    ├── Services/
-    ├── Events/
-    ├── Listeners/
-    ├── Jobs/
-    └── Policies/
+    └── Services/
 ```
 
 Jangan membuat layer atau class hanya demi mengikuti pola. Tambahkan
@@ -291,8 +284,6 @@ abstraksi ketika memang mengurangi coupling atau kompleksitas.
 -   Hindari menyimpan data turunan yang dapat dihitung kecuali ada
     alasan performa yang terukur.
 -   Pastikan penghapusan master tidak merusak histori transaksi.
--   Gunakan database constraint sebagai lapisan perlindungan tambahan,
-    bukan hanya validasi aplikasi.
 
 ## 8.5 Database performance
 
@@ -736,8 +727,8 @@ Sistem dinyatakan memenuhi standar awal apabila:
 1.  Finalisasi aturan bisnis dan skema database.
 2.  Buat migration, model, relationship, factory, dan seeder.
 3.  Implementasikan API response standard.
-4.  Implementasikan backend services, Form Requests, controllers,
-    resources, dan routes.
+4.  Implementasikan backend services, Form Requests, controllers, dan
+    routes.
 5.  Implementasikan authentication dan authorization.
 6.  Implementasikan CRUD Category.
 7.  Implementasikan CRUD COA.
