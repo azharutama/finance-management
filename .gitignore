@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment files
+.env
+.env.*.local
+
+# Build output
+frontend/.nuxt/
+frontend/.output/
+backend/public/build/
+
+# Runtime data
+backend/storage/*.key
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/storage/logs/*
+backend/database/*.sqlite
+
+# Tooling
+.DS_Store
+*.log
