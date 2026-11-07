@@ -19,9 +19,6 @@ class ProfitAndLossReportApiTest extends TestCase
     {
         Excel::fake();
 
-        $admin = User::factory()->create(['role' => 'admin']);
-        Sanctum::actingAs($admin);
-
         $salaryCat = Category::factory()->income()->create(['name' => 'Salary']);
         $otherIncomeCat = Category::factory()->income()->create(['name' => 'Other Income']);
         $transportCat = Category::factory()->expense()->create(['name' => 'Transport Expense']);

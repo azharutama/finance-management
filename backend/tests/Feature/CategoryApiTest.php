@@ -4,20 +4,15 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\ChartOfAccount;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class CategoryApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_list_create_update_and_delete_category(): void
+    public function test_can_list_create_update_and_delete_category(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        Sanctum::actingAs($admin);
-
         // Create
         $createResponse = $this->postJson('/api/v1/categories', [
             'name' => 'Salary',
@@ -61,9 +56,6 @@ class CategoryApiTest extends TestCase
 
     public function test_cannot_delete_category_that_has_coa(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        Sanctum::actingAs($admin);
-
         $category = Category::factory()->expense()->create(['name' => 'Transport Expense']);
         ChartOfAccount::factory()->create([
             'code' => '602',
@@ -79,18 +71,4 @@ class CategoryApiTest extends TestCase
 
         $this->assertDatabaseHas('categories', ['id' => $category->id]);
     }
-
-    public function test_viewer_role_cannot_mutate_categories(): void
-    {
-        $viewer = User::factory()->create(['role' => 'viewer']);
-        Sanctum::actingAs($viewer);
-
-        $category = Category::factory()->create();
-
-        $this->getJson('/api/v1/categories')->assertStatus(200);
-        $this->postJson('/api/v1/categories', ['name' => 'New Cat', 'type' => 'expense'])->assertStatus(403);
-        $this->putJson("/api/v1/categories/{$category->id}", ['name' => 'Updated', 'type' => 'expense'])->assertStatus(403);
-        $this->deleteJson("/api/v1/categories/{$category->id}")->assertStatus(403);
-    }
 }
-

@@ -112,26 +112,15 @@
         </NuxtLink>
       </nav>
 
-      <!-- Bottom User Profile Card (Light theme) -->
-      <div class="p-3.5 m-3 rounded-xl border border-slate-200 bg-slate-50/80 flex items-center justify-between">
-        <div class="flex items-center gap-2.5 overflow-hidden">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
-            {{ user?.name?.charAt(0) || 'U' }}
-          </div>
-          <div class="truncate">
-            <p class="text-xs font-bold text-slate-800 truncate">{{ user?.name || 'User' }}</p>
-            <p class="text-[10px] text-orange-600 font-bold capitalize truncate">{{ user?.role || 'Guest' }}</p>
-          </div>
+      <!-- Bottom System Status Card (Light theme) -->
+      <div class="p-3.5 m-3 rounded-xl border border-slate-200 bg-slate-50/80 flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
+          FM
         </div>
-        <button
-          @click="logout"
-          title="Keluar / Logout"
-          class="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-colors cursor-pointer"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-        </button>
+        <div class="truncate">
+          <p class="text-xs font-bold text-slate-800 truncate">Finance System</p>
+          <p class="text-[10px] text-emerald-600 font-bold truncate">&bull; Online</p>
+        </div>
       </div>
     </aside>
 
@@ -156,7 +145,7 @@
           </div>
         </div>
 
-        <!-- Topbar Right Items (ID badge + Profile Pill) -->
+        <!-- Topbar Right Items -->
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 px-2 py-1 bg-slate-100 rounded-full border border-slate-200/80">
             <span class="w-3.5 h-2 bg-red-600 rounded-xs inline-block"></span>
@@ -164,8 +153,8 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-50 text-orange-600 border border-orange-200">
-              {{ user?.role === 'admin' ? 'Administrator' : 'Viewer' }}
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
+              Finance Admin
             </span>
 
             <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-xs shadow-xs">
@@ -198,5 +187,5 @@
 </template>
 
 <script setup lang="ts">
-const { user, logout } = useAuth();
+// Direct access without login
 </script>

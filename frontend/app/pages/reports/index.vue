@@ -180,7 +180,6 @@ import type { ProfitLossReport } from '~/types';
 
 const api = useApi();
 const config = useRuntimeConfig();
-const { token } = useAuth();
 
 const report = ref<ProfitLossReport | null>(null);
 const loading = ref(true);
@@ -219,11 +218,7 @@ const handleExportExcel = async () => {
       end_month: endMonth.value || '',
     }).toString();
 
-    const response = await fetch(`${config.public.apiBaseUrl}/reports/profit-loss/export?${query}`, {
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
+    const response = await fetch(`${config.public.apiBaseUrl}/reports/profit-loss/export?${query}`);
 
     if (!response.ok) throw new Error('Export failed');
 

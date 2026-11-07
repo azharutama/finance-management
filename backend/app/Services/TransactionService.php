@@ -68,7 +68,7 @@ class TransactionService
             /** @var ChartOfAccount|null $coa */
             $coa = ChartOfAccount::with('category')->whereKey($data['coa_id'])->lockForUpdate()->first();
 
-            if (! $coa || ! $coa->is_active || ($coa->category && ! $coa->category->is_active)) {
+            if (! $coa || ! $coa->is_active) {
                 throw ValidationException::withMessages([
                     'coa_id' => ['The selected Chart of Account is inactive and cannot be used for transactions.'],
                 ]);

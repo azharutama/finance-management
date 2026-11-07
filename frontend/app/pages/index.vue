@@ -12,7 +12,7 @@
             <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
             Sistem Informasi Keuangan
           </div>
-          <h1 class="text-2xl font-black tracking-tight">Selamat Datang, {{ user?.name }}!</h1>
+          <h1 class="text-2xl font-black tracking-tight">Selamat Datang di Financial Management!</h1>
           <p class="text-sky-100 text-xs mt-1 leading-relaxed">
             Kelola Master Kategori, Chart of Account (COA), pencatatan transaksi harian, serta Laporan Profit & Loss bulanan dengan export Excel otomatis.
           </p>
@@ -190,7 +190,6 @@
 import type { ProfitLossReport, Transaction } from '~/types';
 import { formatCurrency, formatDate } from '~/utils/formatters';
 
-const { user } = useAuth();
 const api = useApi();
 
 const loading = ref(true);

@@ -8,7 +8,6 @@
           <p class="text-xs text-slate-400 mt-0.5">Kelola akun COA (401 - Gaji Karyawan, 602 - Bensin, dsb.) beserta relasi kategorinya</p>
         </div>
         <button
-          v-if="user?.role === 'admin'"
           @click="openModal()"
           class="inline-flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-500/20 transition-all cursor-pointer self-start sm:self-auto"
         >
@@ -55,7 +54,7 @@
                 <th class="px-6 py-3">Kategori</th>
                 <th class="px-6 py-3 text-center">Jumlah Transaksi</th>
                 <th class="px-6 py-3 text-center">Status</th>
-                <th class="px-6 py-3 text-right" v-if="user?.role === 'admin'">Aksi</th>
+                <th class="px-6 py-3 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -88,7 +87,7 @@
                     {{ coa.is_active ? 'Aktif' : 'Nonaktif' }}
                   </span>
                 </td>
-                <td class="px-6 py-3.5 text-xs text-right space-x-2" v-if="user?.role === 'admin'">
+                <td class="px-6 py-3.5 text-xs text-right space-x-2">
                   <button
                     @click="openModal(coa)"
                     class="text-sky-600 hover:text-sky-800 font-bold cursor-pointer"
@@ -219,7 +218,6 @@
 <script setup lang="ts">
 import type { Category, ChartOfAccount, PaginationMeta } from '~/types';
 
-const { user } = useAuth();
 const api = useApi();
 
 const coaList = ref<ChartOfAccount[]>([]);

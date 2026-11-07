@@ -8,7 +8,6 @@
           <p class="text-xs text-slate-400 mt-0.5">Kelola kategori kelompok transaksi (Salary, Other Income, Family Expense, dsb.)</p>
         </div>
         <button
-          v-if="user?.role === 'admin'"
           @click="openModal()"
           class="inline-flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-500/20 transition-all cursor-pointer self-start sm:self-auto"
         >
@@ -52,16 +51,15 @@
                 <th class="px-6 py-3">Nama Kategori</th>
                 <th class="px-6 py-3">Tipe Klasifikasi</th>
                 <th class="px-6 py-3 text-center">Jumlah Akun COA</th>
-                <th class="px-6 py-3 text-center">Status</th>
-                <th class="px-6 py-3 text-right" v-if="user?.role === 'admin'">Aksi</th>
+                <th class="px-6 py-3 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
               <tr v-if="loading">
-                <td colspan="5" class="px-6 py-8 text-center text-slate-400 text-xs">Memuat data kategori...</td>
+                <td colspan="4" class="px-6 py-8 text-center text-slate-400 text-xs">Memuat data kategori...</td>
               </tr>
               <tr v-else-if="!categories.length">
-                <td colspan="5" class="px-6 py-8 text-center text-slate-400 text-xs">Tidak ada kategori ditemukan</td>
+                <td colspan="4" class="px-6 py-8 text-center text-slate-400 text-xs">Tidak ada kategori ditemukan</td>
               </tr>
               <tr v-for="cat in categories" :key="cat.id" class="hover:bg-slate-50/70 transition-colors">
                 <td class="px-6 py-3.5 text-xs font-bold text-slate-900">{{ cat.name }}</td>
@@ -76,16 +74,7 @@
                 <td class="px-6 py-3.5 text-xs text-center font-mono font-bold text-slate-700">
                   {{ cat.chart_of_accounts_count ?? 0 }}
                 </td>
-                <td class="px-6 py-3.5 text-xs text-center">
-                  <span
-                    class="inline-block w-2 h-2 rounded-full mr-1.5"
-                    :class="cat.is_active ? 'bg-emerald-500' : 'bg-slate-300'"
-                  ></span>
-                  <span :class="cat.is_active ? 'text-slate-700 font-semibold' : 'text-slate-400'">
-                    {{ cat.is_active ? 'Aktif' : 'Nonaktif' }}
-                  </span>
-                </td>
-                <td class="px-6 py-3.5 text-xs text-right space-x-2" v-if="user?.role === 'admin'">
+                <td class="px-6 py-3.5 text-xs text-right space-x-2">
                   <button
                     @click="openModal(cat)"
                     class="text-sky-600 hover:text-sky-800 font-bold cursor-pointer"
@@ -111,17 +100,23 @@
             <button
               :disabled="meta.current_page <= 1"
               @click="fetchCategories(meta.current_page - 1)"
-              class="w-8 h-8 flex items-center justify-center border border-slate-200 rounded-lg hover:bg-white disabled:opacity-40 cursor-pointer"
+              class="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold disabled:opacity-40 hover:bg-slate-100"
             >
               &lt;
             </button>
-            <span class="w-8 h-8 flex items-center justify-center bg-sky-500 text-white font-bold rounded-lg shadow-xs">
-              {{ meta.current_page }}
-            </span>
+            <button
+              v-for="p in meta.last_page"
+              :key="p"
+              @click="fetchCategories(p)"
+              class="w-7 h-7 rounded-lg text-xs font-bold transition-all"
+              :class="p === meta.current_page ? 'bg-sky-500 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 border border-slate-200'"
+            >
+              {{ p }}
+            </button>
             <button
               :disabled="meta.current_page >= meta.last_page"
               @click="fetchCategories(meta.current_page + 1)"
-              class="w-8 h-8 flex items-center justify-center border border-slate-200 rounded-lg hover:bg-white disabled:opacity-40 cursor-pointer"
+              class="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold disabled:opacity-40 hover:bg-slate-100"
             >
               &gt;
             </button>
@@ -129,18 +124,18 @@
         </div>
       </div>
 
-      <!-- Add/Edit Modal Dialog -->
-      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-            <h3 class="font-bold text-slate-900 text-sm">
+      <!-- Modal Create / Edit -->
+      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="text-sm font-extrabold text-slate-900">
               {{ editingCategory ? 'Ubah Kategori' : 'Tambah Kategori Baru' }}
             </h3>
             <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
           </div>
 
-          <form @submit.prevent="saveCategory" class="p-6 space-y-4">
-            <div v-if="formError" class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs">
+          <form @submit.prevent="saveCategory" class="mt-4 space-y-4">
+            <div v-if="formError" class="p-3 text-xs bg-rose-50 text-rose-600 border border-rose-200 rounded-xl">
               {{ formError }}
             </div>
 
@@ -165,16 +160,6 @@
                 <option value="expense">Expense (Pengeluaran)</option>
                 <option value="income">Income (Pemasukan)</option>
               </select>
-            </div>
-
-            <div class="flex items-center gap-2 pt-1">
-              <input
-                v-model="form.is_active"
-                id="is_active"
-                type="checkbox"
-                class="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500"
-              />
-              <label for="is_active" class="text-xs text-slate-700 select-none font-medium">Status Aktif</label>
             </div>
 
             <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
@@ -203,7 +188,6 @@
 <script setup lang="ts">
 import type { Category, PaginationMeta } from '~/types';
 
-const { user } = useAuth();
 const api = useApi();
 
 const categories = ref<Category[]>([]);
@@ -219,7 +203,6 @@ const formError = ref('');
 const form = reactive({
   name: '',
   type: 'expense' as 'income' | 'expense',
-  is_active: true,
 });
 
 let searchTimeout: any = null;
@@ -255,12 +238,10 @@ const openModal = (cat?: Category) => {
     editingCategory.value = cat;
     form.name = cat.name;
     form.type = cat.type;
-    form.is_active = cat.is_active;
   } else {
     editingCategory.value = null;
     form.name = '';
     form.type = 'expense';
-    form.is_active = true;
   }
   showModal.value = true;
 };
@@ -275,21 +256,21 @@ const saveCategory = async () => {
       await api.post('/categories', form);
     }
     showModal.value = false;
-    fetchCategories(meta.value?.current_page || 1);
+    await fetchCategories(meta.value?.current_page || 1);
   } catch (err: any) {
-    formError.value = err.message || (err.errors ? Object.values(err.errors)[0] as string : 'Gagal menyimpan kategori');
+    formError.value = err?.message || 'Gagal menyimpan kategori.';
   } finally {
     saving.value = false;
   }
 };
 
 const handleDelete = async (cat: Category) => {
-  if (!confirm(`Apakah Anda yakin ingin menghapus kategori "${cat.name}"?`)) return;
+  if (!confirm(`Hapus kategori "${cat.name}"?`)) return;
   try {
     await api.delete(`/categories/${cat.id}`);
-    fetchCategories(meta.value?.current_page || 1);
+    await fetchCategories(meta.value?.current_page || 1);
   } catch (err: any) {
-    alert(err.message || 'Gagal menghapus kategori. Kategori mungkin masih memiliki akun COA.');
+    alert(err?.message || 'Gagal menghapus kategori. Kemungkinan terdapat relasi ke data lain.');
   }
 };
 

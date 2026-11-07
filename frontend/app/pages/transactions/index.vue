@@ -8,7 +8,6 @@
           <p class="text-xs text-slate-400 mt-0.5">Catat transaksi pemasukan (Credit) dan pengeluaran (Debit) berdasarkan COA</p>
         </div>
         <button
-          v-if="user?.role === 'admin'"
           @click="openModal()"
           class="inline-flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-500/20 transition-all cursor-pointer self-start sm:self-auto"
         >
@@ -83,7 +82,7 @@
                 <th class="px-6 py-3">Deskripsi Transaksi</th>
                 <th class="px-6 py-3 text-right">Debit (Expense)</th>
                 <th class="px-6 py-3 text-right">Credit (Income)</th>
-                <th class="px-6 py-3 text-right" v-if="user?.role === 'admin'">Aksi</th>
+                <th class="px-6 py-3 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -107,7 +106,7 @@
                 <td class="px-6 py-3.5 text-xs text-right font-bold text-emerald-600">
                   {{ tx.credit > 0 ? formatCurrency(tx.credit) : '-' }}
                 </td>
-                <td class="px-6 py-3.5 text-xs text-right space-x-2 whitespace-nowrap" v-if="user?.role === 'admin'">
+                <td class="px-6 py-3.5 text-xs text-right space-x-2 whitespace-nowrap">
                   <button
                     @click="openModal(tx)"
                     class="text-sky-600 hover:text-sky-800 font-bold cursor-pointer"
@@ -258,7 +257,6 @@
 import type { Category, ChartOfAccount, PaginationMeta, Transaction } from '~/types';
 import { formatCurrency, formatDate } from '~/utils/formatters';
 
-const { user } = useAuth();
 const api = useApi();
 
 const transactions = ref<Transaction[]>([]);

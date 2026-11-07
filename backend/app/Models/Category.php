@@ -20,15 +20,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'type',
-        'is_active',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'is_active' => 'boolean',
-        ];
-    }
 
     /**
      * @return HasMany<ChartOfAccount, $this>

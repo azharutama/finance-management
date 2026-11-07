@@ -4,20 +4,15 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\ChartOfAccount;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class TransactionApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_record_income_and_expense_transactions_and_enforce_debit_credit_rules(): void
+    public function test_can_record_income_and_expense_transactions_and_enforce_debit_credit_rules(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        Sanctum::actingAs($admin);
-
         $incomeCategory = Category::factory()->income()->create(['name' => 'Salary']);
         $expenseCategory = Category::factory()->expense()->create(['name' => 'Transport Expense']);
 
@@ -103,4 +98,3 @@ class TransactionApiTest extends TestCase
             ->assertJsonPath('data.0.description', 'Bensin Mobil');
     }
 }
-

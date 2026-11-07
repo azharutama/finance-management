@@ -45,7 +45,7 @@ class TransactionController extends Controller
     {
         $transaction->load([
             'coa:id,code,name,category_id,is_active',
-            'coa.category:id,name,type,is_active',
+            'coa.category:id,name,type',
         ]);
 
         return ApiResponse::success(
@@ -64,12 +64,8 @@ class TransactionController extends Controller
         );
     }
 
-    public function destroy(Request $request, Transaction $transaction): JsonResponse
+    public function destroy(Transaction $transaction): JsonResponse
     {
-        if (! $request->user()?->isAdmin()) {
-            abort(403, 'This action is unauthorized.');
-        }
-
         $this->transactionService->delete($transaction);
 
         return ApiResponse::success(null, 'Transaction deleted successfully.');

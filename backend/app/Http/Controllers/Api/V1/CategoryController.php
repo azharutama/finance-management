@@ -66,12 +66,8 @@ class CategoryController extends Controller
         );
     }
 
-    public function destroy(Request $request, Category $category): JsonResponse
+    public function destroy(Category $category): JsonResponse
     {
-        if (! $request->user()?->isAdmin()) {
-            abort(403, 'This action is unauthorized.');
-        }
-
         $this->categoryService->delete($category);
 
         return ApiResponse::success(null, 'Category deleted successfully.');

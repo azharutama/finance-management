@@ -66,12 +66,8 @@ class ChartOfAccountController extends Controller
         );
     }
 
-    public function destroy(Request $request, ChartOfAccount $coa): JsonResponse
+    public function destroy(ChartOfAccount $coa): JsonResponse
     {
-        if (! $request->user()?->isAdmin()) {
-            abort(403, 'This action is unauthorized.');
-        }
-
         $this->coaService->delete($coa);
 
         return ApiResponse::success(null, 'Chart of Account deleted successfully.');

@@ -12,7 +12,7 @@ class StoreTransactionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isAdmin() ?? false;
+        return true;
     }
 
     /**
@@ -62,7 +62,7 @@ class StoreTransactionRequest extends FormRequest
                 }
 
                 $coa = ChartOfAccount::with('category')->find($this->input('coa_id'));
-                if (! $coa || ! $coa->is_active || ($coa->category && ! $coa->category->is_active)) {
+                if (! $coa || ! $coa->is_active) {
                     $validator->errors()->add('coa_id', 'The selected Chart of Account is inactive and cannot be used for transactions.');
 
                     return;

@@ -46,10 +46,9 @@ keuangan. Perhitungan dan validasi penting harus dilakukan di backend.
     dan net income berdasarkan bulan/periode.
 -   Excel Export: mengekspor laporan Profit & Loss sesuai filter
     periode.
--   Authentication dan authorization sesuai kebutuhan peran pengguna.
-
 ### 3.2 Di luar ruang lingkup awal
 
+-   Fitur autentikasi dan login (dihilangkan sesuai permintaan pengguna; sistem berjalan dalam mode direct access).
 -   Integrasi bank atau payment gateway.
 -   Multi-currency.
 -   Konsolidasi banyak perusahaan/cabang.
@@ -123,14 +122,7 @@ dengan laporan di layar.
 
 ## 5. Pengguna dan Hak Akses
 
-Peran pengguna perlu ditentukan sebelum implementasi autentikasi. Untuk
-versi awal, sistem dapat dimulai dengan satu peran administrator apabila
-belum ada matriks peran lain.
-
-Aturan: - Setiap endpoint yang dilindungi harus memeriksa autentikasi. -
-Hak akses diperiksa di backend melalui middleware atau Form Request. -
-Menyembunyikan tombol di frontend bukan mekanisme authorization. -
-Pengguna hanya boleh melakukan aksi sesuai hak aksesnya.
+Sesuai instruksi pengguna, fitur login dan autentikasi ditiadakan sehingga sistem dapat langsung digunakan tanpa sesi login. Seluruh pengguna memiliki akses penuh ke fitur pengelolaan Category, COA, Transaksi, Laporan, dan Export Excel.
 
 ## 6. Kebutuhan Fungsional
 

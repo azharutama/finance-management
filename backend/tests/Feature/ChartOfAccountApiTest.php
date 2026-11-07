@@ -5,20 +5,15 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\ChartOfAccount;
 use App\Models\Transaction;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class ChartOfAccountApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_crud_chart_of_account(): void
+    public function test_can_crud_chart_of_account(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        Sanctum::actingAs($admin);
-
         $category = Category::factory()->income()->create(['name' => 'Salary']);
 
         // Create COA
@@ -59,9 +54,6 @@ class ChartOfAccountApiTest extends TestCase
 
     public function test_cannot_delete_coa_used_in_transactions(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        Sanctum::actingAs($admin);
-
         $category = Category::factory()->expense()->create(['name' => 'Meal Expense']);
         $coa = ChartOfAccount::factory()->create([
             'code' => '604',
@@ -81,4 +73,3 @@ class ChartOfAccountApiTest extends TestCase
         $this->assertDatabaseHas('chart_of_accounts', ['id' => $coa->id]);
     }
 }
-

@@ -17,7 +17,6 @@ class CategoryFactory extends Factory
         return [
             'name' => fake()->unique()->words(2, true).' '.fake()->numberBetween(100, 999),
             'type' => fake()->randomElement([Category::TYPE_INCOME, Category::TYPE_EXPENSE]),
-            'is_active' => true,
         ];
     }
 

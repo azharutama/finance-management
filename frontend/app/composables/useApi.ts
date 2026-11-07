@@ -2,17 +2,12 @@ import type { ApiResponse } from '~/types';
 
 export const useApi = () => {
   const config = useRuntimeConfig();
-  const { token, logout } = useAuth();
 
   const request = async <T>(endpoint: string, options: Parameters<typeof $fetch>[1] = {}): Promise<ApiResponse<T>> => {
     const headers: Record<string, string> = {
       Accept: 'application/json',
       ...(options.headers as Record<string, string> || {}),
     };
-
-    if (token.value) {
-      headers.Authorization = `Bearer ${token.value}`;
-    }
 
     try {
       const url = `${config.public.apiBaseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
@@ -21,9 +16,6 @@ export const useApi = () => {
         headers,
       });
     } catch (err: any) {
-      if (err.response?.status === 401) {
-        logout();
-      }
       throw err.response?._data || err;
     }
   };
@@ -35,4 +27,3 @@ export const useApi = () => {
     delete: <T>(url: string) => request<T>(url, { method: 'DELETE' }),
   };
 };
-
