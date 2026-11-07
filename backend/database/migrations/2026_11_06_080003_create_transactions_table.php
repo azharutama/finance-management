@@ -18,10 +18,11 @@ return new class extends Migration
             $table->string('description', 255);
             $table->decimal('debit', 15, 2)->default(0);
             $table->decimal('credit', 15, 2)->default(0);
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['date', 'coa_id']);
+            $table->index('deleted_at');
         });
     }
 

@@ -16,10 +16,9 @@ return new class extends Migration
             $table->string('code', 30)->unique();
             $table->string('name', 150);
             $table->foreignId('category_id')->constrained('categories')->restrictOnDelete();
-            $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
 
-            $table->index(['category_id', 'is_active']);
+            $table->index('category_id');
         });
     }
 

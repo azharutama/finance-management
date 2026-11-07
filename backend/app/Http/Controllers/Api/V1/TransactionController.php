@@ -44,8 +44,8 @@ class TransactionController extends Controller
     public function show(Transaction $transaction): JsonResponse
     {
         $transaction->load([
-            'coa:id,code,name,category_id,is_active',
-            'coa.category:id,name,type',
+            'coa:id,code,name,category_id',
+            'coa.category:id,name',
         ]);
 
         return ApiResponse::success(

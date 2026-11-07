@@ -48,7 +48,7 @@ class ChartOfAccountController extends Controller
 
     public function show(ChartOfAccount $coa): JsonResponse
     {
-        $coa->load('category:id,name,type')->loadCount('transactions');
+        $coa->load('category:id,name')->loadCount('transactions');
 
         return ApiResponse::success(
             $coa,

@@ -2,185 +2,114 @@
   <NuxtLayout>
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="text-xl font-black text-slate-900 tracking-tight">Master Kategori</h1>
-          <p class="text-xs text-slate-400 mt-0.5">Kelola kategori kelompok transaksi (Salary, Other Income, Family Expense, dsb.)</p>
-        </div>
-        <button
-          @click="openModal()"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-500/20 transition-all cursor-pointer self-start sm:self-auto"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Tambah Kategori
-        </button>
-      </div>
-
-      <!-- Filters & Search Pill -->
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm flex flex-wrap items-center gap-3">
-        <div class="flex-1 min-w-[220px]">
-          <input
-            v-model="search"
-            @input="debounceSearch"
-            type="text"
-            placeholder="Cari nama kategori..."
-            class="w-full px-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/10 transition-all font-medium"
-          />
-        </div>
-        <div class="w-44">
-          <select
-            v-model="filterType"
-            @change="fetchCategories(1)"
-            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-sky-500 transition-colors font-medium text-slate-700"
+      <PageHeader
+        title="Master Kategori"
+        description="Kelola kategori kelompok transaksi (Salary, Other Income, Family Expense, dsb.)"
+      >
+        <template #actions>
+          <button
+            @click="openModal()"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-500/20 transition-all cursor-pointer"
           >
-            <option value="">Semua Tipe</option>
-            <option value="income">Income (Pemasukan)</option>
-            <option value="expense">Expense (Pengeluaran)</option>
-          </select>
-        </div>
-      </div>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Tambah Kategori
+          </button>
+        </template>
+      </PageHeader>
 
-      <!-- Table Card (Clean Modern Card) -->
-      <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider border-b border-slate-200/60 font-bold">
-              <tr>
-                <th class="px-6 py-3">Nama Kategori</th>
-                <th class="px-6 py-3">Tipe Klasifikasi</th>
-                <th class="px-6 py-3 text-center">Jumlah Akun COA</th>
-                <th class="px-6 py-3 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-slate-700">
-              <tr v-if="loading">
-                <td colspan="4" class="px-6 py-8 text-center text-slate-400 text-xs">Memuat data kategori...</td>
-              </tr>
-              <tr v-else-if="!categories.length">
-                <td colspan="4" class="px-6 py-8 text-center text-slate-400 text-xs">Tidak ada kategori ditemukan</td>
-              </tr>
-              <tr v-for="cat in categories" :key="cat.id" class="hover:bg-slate-50/70 transition-colors">
-                <td class="px-6 py-3.5 text-xs font-bold text-slate-900">{{ cat.name }}</td>
-                <td class="px-6 py-3.5 text-xs">
-                  <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider"
-                    :class="cat.type === 'income' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
-                  >
-                    {{ cat.type === 'income' ? 'Income' : 'Expense' }}
-                  </span>
-                </td>
-                <td class="px-6 py-3.5 text-xs text-center font-mono font-bold text-slate-700">
-                  {{ cat.chart_of_accounts_count ?? 0 }}
-                </td>
-                <td class="px-6 py-3.5 text-xs text-right space-x-2">
-                  <button
-                    @click="openModal(cat)"
-                    class="text-sky-600 hover:text-sky-800 font-bold cursor-pointer"
-                  >
-                    Ubah
-                  </button>
-                  <button
-                    @click="handleDelete(cat)"
-                    class="text-rose-500 hover:text-rose-700 font-bold cursor-pointer"
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <!-- Filter Card Component -->
+      <FilterCard>
+        <FilterSearch
+          v-model="search"
+          @input="debounceSearch"
+          placeholder="Cari nama kategori..."
+        />
+      </FilterCard>
 
-        <!-- Pagination Styled like Modern Pill Page Buttons -->
-        <div v-if="meta && meta.last_page > 1" class="px-6 py-3.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50">
-          <span>Halaman {{ meta.current_page }} dari {{ meta.last_page }} (Total {{ meta.total }} data)</span>
-          <div class="flex items-center gap-1">
-            <button
-              :disabled="meta.current_page <= 1"
-              @click="fetchCategories(meta.current_page - 1)"
-              class="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold disabled:opacity-40 hover:bg-slate-100"
-            >
-              &lt;
-            </button>
-            <button
-              v-for="p in meta.last_page"
-              :key="p"
-              @click="fetchCategories(p)"
-              class="w-7 h-7 rounded-lg text-xs font-bold transition-all"
-              :class="p === meta.current_page ? 'bg-sky-500 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 border border-slate-200'"
-            >
-              {{ p }}
-            </button>
-            <button
-              :disabled="meta.current_page >= meta.last_page"
-              @click="fetchCategories(meta.current_page + 1)"
-              class="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold disabled:opacity-40 hover:bg-slate-100"
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
-      </div>
+      <!-- Table Card -->
+      <DataTableCard>
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider border-b border-slate-200/60 font-bold">
+            <tr>
+              <th class="px-6 py-3">nama</th>
+              <th class="px-6 py-3 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-700">
+            <tr v-if="loading">
+              <td colspan="2" class="px-6 py-8 text-center text-slate-400 text-xs">Memuat data kategori...</td>
+            </tr>
+            <tr v-else-if="!categories.length">
+              <td colspan="2" class="px-6 py-8 text-center text-slate-400 text-xs">Tidak ada kategori ditemukan</td>
+            </tr>
+            <tr v-for="cat in categories" :key="cat.id" class="hover:bg-slate-50/70 transition-colors">
+              <td class="px-6 py-3.5 text-xs font-bold text-slate-900">{{ cat.name }}</td>
+              <td class="px-6 py-3.5 text-xs text-right space-x-2">
+                <button
+                  @click="openModal(cat)"
+                  class="text-sky-600 hover:text-sky-800 font-bold cursor-pointer"
+                >
+                  Ubah
+                </button>
+                <button
+                  @click="handleDelete(cat)"
+                  class="text-rose-500 hover:text-rose-700 font-bold cursor-pointer"
+                >
+                  Hapus
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <template #footer>
+          <AppPagination :meta="meta" @change="fetchCategories" />
+        </template>
+      </DataTableCard>
 
       <!-- Modal Create / Edit -->
-      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 class="text-sm font-extrabold text-slate-900">
-              {{ editingCategory ? 'Ubah Kategori' : 'Tambah Kategori Baru' }}
-            </h3>
-            <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+      <AppModal
+        :show="showModal"
+        :title="editingCategory ? 'Ubah Kategori' : 'Tambah Kategori Baru'"
+        max-width-class="max-w-md"
+        @close="showModal = false"
+      >
+        <form @submit.prevent="saveCategory" class="space-y-4">
+          <div v-if="formError" class="p-3 text-xs bg-rose-50 text-rose-600 border border-rose-200 rounded-xl">
+            {{ formError }}
           </div>
 
-          <form @submit.prevent="saveCategory" class="mt-4 space-y-4">
-            <div v-if="formError" class="p-3 text-xs bg-rose-50 text-rose-600 border border-rose-200 rounded-xl">
-              {{ formError }}
-            </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kategori *</label>
+            <input
+              v-model="form.name"
+              required
+              type="text"
+              placeholder="Contoh: Transport Expense"
+              class="w-full px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 font-medium"
+            />
+          </div>
 
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kategori *</label>
-              <input
-                v-model="form.name"
-                required
-                type="text"
-                placeholder="Contoh: Transport Expense"
-                class="w-full px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 font-medium"
-              />
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Tipe Transaksi *</label>
-              <select
-                v-model="form.type"
-                required
-                class="w-full px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 font-medium"
-              >
-                <option value="expense">Expense (Pengeluaran)</option>
-                <option value="income">Income (Pemasukan)</option>
-              </select>
-            </div>
-
-            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
-              <button
-                type="button"
-                @click="showModal = false"
-                class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                :disabled="saving"
-                class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold disabled:opacity-50 cursor-pointer"
-              >
-                {{ saving ? 'Menyimpan...' : 'Simpan Kategori' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+          <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+            <button
+              type="button"
+              @click="showModal = false"
+              class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              :disabled="saving"
+              class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold disabled:opacity-50 cursor-pointer"
+            >
+              {{ saving ? 'Menyimpan...' : 'Simpan Kategori' }}
+            </button>
+          </div>
+        </form>
+      </AppModal>
     </div>
   </NuxtLayout>
 </template>
@@ -194,7 +123,6 @@ const categories = ref<Category[]>([]);
 const meta = ref<PaginationMeta | null>(null);
 const loading = ref(true);
 const search = ref('');
-const filterType = ref('');
 
 const showModal = ref(false);
 const editingCategory = ref<Category | null>(null);
@@ -202,7 +130,6 @@ const saving = ref(false);
 const formError = ref('');
 const form = reactive({
   name: '',
-  type: 'expense' as 'income' | 'expense',
 });
 
 let searchTimeout: any = null;
@@ -219,7 +146,6 @@ const fetchCategories = async (page = 1) => {
     const res = await api.get<Category[]>('/categories', {
       page,
       search: search.value || undefined,
-      type: filterType.value || undefined,
     });
     if (res.success && res.data) {
       categories.value = res.data;
@@ -237,11 +163,9 @@ const openModal = (cat?: Category) => {
   if (cat) {
     editingCategory.value = cat;
     form.name = cat.name;
-    form.type = cat.type;
   } else {
     editingCategory.value = null;
     form.name = '';
-    form.type = 'expense';
   }
   showModal.value = true;
 };

@@ -13,13 +13,8 @@ class Category extends Model
     /** @use HasFactory<CategoryFactory> */
     use HasFactory;
 
-    public const TYPE_INCOME = 'income';
-
-    public const TYPE_EXPENSE = 'expense';
-
     protected $fillable = [
         'name',
-        'type',
     ];
 
     /**

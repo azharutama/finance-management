@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\ChartOfAccount;
+use App\Models\Transaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -55,6 +56,17 @@ class TransactionApiTest extends TestCase
             ->assertJsonPath('data.debit', 25000)
             ->assertJsonPath('data.credit', 0);
 
+        // Valid adjustment transaction (debit on income COA as salary deduction)
+        $adjTx = $this->postJson('/api/v1/transactions', [
+            'date' => '2026-01-15',
+            'coa_id' => $incomeCoa->id,
+            'description' => 'Koreksi Potongan Gaji',
+            'debit' => 200000,
+            'credit' => 0,
+        ]);
+        $adjTx->assertStatus(201)
+            ->assertJsonPath('data.debit', 200000);
+
         // Invalid: both debit and credit > 0
         $this->postJson('/api/v1/transactions', [
             'date' => '2026-01-10',
@@ -82,19 +94,17 @@ class TransactionApiTest extends TestCase
             'credit' => 0,
         ])->assertStatus(422);
 
-        // Invalid: debit > 0 on income COA
-        $this->postJson('/api/v1/transactions', [
-            'date' => '2026-01-10',
-            'coa_id' => $incomeCoa->id,
-            'description' => 'Wrong side for income',
-            'debit' => 500000,
-            'credit' => 0,
-        ])->assertStatus(422);
-
         // Filter transactions by category_id and date range
         $listResponse = $this->getJson("/api/v1/transactions?category_id={$expenseCategory->id}&start_date=2026-01-01&end_date=2026-01-31");
         $listResponse->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.description', 'Bensin Mobil');
+
+        // Test Soft Delete: transaction is soft deleted, not physically removed
+        $txId = $expenseTx->json('data.id');
+        $delResponse = $this->deleteJson("/api/v1/transactions/{$txId}");
+        $delResponse->assertStatus(200);
+
+        $this->assertSoftDeleted('transactions', ['id' => $txId]);
     }
 }

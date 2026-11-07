@@ -16,8 +16,8 @@ class ChartOfAccountService
     public function list(array $filters = []): LengthAwarePaginator|Collection
     {
         $query = ChartOfAccount::query()
-            ->select(['id', 'code', 'name', 'category_id', 'is_active', 'created_at', 'updated_at'])
-            ->with(['category:id,name,type'])
+            ->select(['id', 'code', 'name', 'category_id', 'created_at', 'updated_at'])
+            ->with(['category:id,name'])
             ->withCount('transactions');
 
         if (! empty($filters['search'])) {
@@ -30,10 +30,6 @@ class ChartOfAccountService
 
         if (! empty($filters['category_id'])) {
             $query->where('category_id', (int) $filters['category_id']);
-        }
-
-        if (isset($filters['is_active']) && $filters['is_active'] !== null) {
-            $query->where('is_active', (bool) $filters['is_active']);
         }
 
         $query->orderBy('code');
@@ -57,10 +53,9 @@ class ChartOfAccountService
                 'code' => $data['code'],
                 'name' => $data['name'],
                 'category_id' => (int) $data['category_id'],
-                'is_active' => $data['is_active'] ?? true,
             ]);
 
-            return $coa->load('category:id,name,type')->loadCount('transactions');
+            return $coa->load('category:id,name')->loadCount('transactions');
         });
     }
 
@@ -71,26 +66,17 @@ class ChartOfAccountService
     {
         return DB::transaction(function () use ($coa, $data) {
             /** @var ChartOfAccount $locked */
-            $locked = ChartOfAccount::with('category')->whereKey($coa->id)->lockForUpdate()->firstOrFail();
+            $locked = ChartOfAccount::whereKey($coa->id)->lockForUpdate()->firstOrFail();
 
             $newCategoryId = (int) $data['category_id'];
-            if ($newCategoryId !== (int) $locked->category_id && $locked->transactions()->exists()) {
-                $newCategory = Category::findOrFail($newCategoryId);
-                if ($locked->category && $newCategory->type !== $locked->category->type) {
-                    abort(409, 'Cannot move Chart of Account to a category with a different type because transactions already exist.');
-                }
-            }
 
             $locked->update([
                 'code' => $data['code'],
                 'name' => $data['name'],
                 'category_id' => $newCategoryId,
-                'is_active' => array_key_exists('is_active', $data) && $data['is_active'] !== null
-                    ? (bool) $data['is_active']
-                    : $locked->is_active,
             ]);
 
-            return $locked->load('category:id,name,type')->loadCount('transactions');
+            return $locked->load('category:id,name')->loadCount('transactions');
         });
     }
 

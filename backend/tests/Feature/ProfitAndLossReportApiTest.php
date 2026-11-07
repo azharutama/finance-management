@@ -53,6 +53,15 @@ class ProfitAndLossReportApiTest extends TestCase
         ]);
 
         // Feb 2022 is intentionally empty to test zero-filled months!
+        // A soft-deleted transaction in Jan 2022 must be completely ignored in report calculations
+        $deletedTx = Transaction::factory()->create([
+            'date' => '2022-01-15',
+            'coa_id' => $coaLunch->id,
+            'description' => 'Makan Deleted',
+            'debit' => 999999,
+            'credit' => 0,
+        ]);
+        $deletedTx->delete();
 
         // Mar 2022 transactions
         Transaction::factory()->create([

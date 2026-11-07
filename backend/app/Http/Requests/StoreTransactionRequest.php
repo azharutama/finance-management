@@ -61,19 +61,9 @@ class StoreTransactionRequest extends FormRequest
                     return;
                 }
 
-                $coa = ChartOfAccount::with('category')->find($this->input('coa_id'));
-                if (! $coa || ! $coa->is_active) {
-                    $validator->errors()->add('coa_id', 'The selected Chart of Account is inactive and cannot be used for transactions.');
-
-                    return;
-                }
-
-                if ($coa->category) {
-                    if ($coa->category->type === Category::TYPE_INCOME && $debit > 0) {
-                        $validator->errors()->add('credit', 'Income category COA transactions must be recorded in Credit.');
-                    } elseif ($coa->category->type === Category::TYPE_EXPENSE && $credit > 0) {
-                        $validator->errors()->add('debit', 'Expense category COA transactions must be recorded in Debit.');
-                    }
+                $coa = ChartOfAccount::find($this->input('coa_id'));
+                if (! $coa) {
+                    $validator->errors()->add('coa_id', 'The selected Chart of Account does not exist.');
                 }
             },
         ];

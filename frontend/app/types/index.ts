@@ -25,8 +25,6 @@ export interface User {
 export interface Category {
   id: number;
   name: string;
-  type: 'income' | 'expense';
-  is_active: boolean;
   chart_of_accounts_count?: number;
   created_at?: string;
   updated_at?: string;
@@ -37,7 +35,6 @@ export interface ChartOfAccount {
   code: string;
   name: string;
   category_id: number;
-  is_active: boolean;
   category?: Category;
   transactions_count?: number;
   created_at?: string;
@@ -51,10 +48,20 @@ export interface Transaction {
   description: string;
   debit: number;
   credit: number;
-  created_by?: number;
   coa?: ChartOfAccount;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface DashboardSummary {
+  month: string;
+  start_date: string;
+  end_date: string;
+  total_income: number;
+  total_expense: number;
+  net_income: number;
+  credit_count: number;
+  debit_count: number;
 }
 
 export interface ProfitLossReport {

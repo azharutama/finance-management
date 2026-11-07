@@ -17,6 +17,9 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::apiResource('transactions', TransactionController::class)
         ->names('api.v1.transactions');
 
+    Route::get('/reports/dashboard-summary', [ReportController::class, 'dashboardSummary'])
+        ->name('api.v1.reports.dashboard-summary');
+
     Route::get('/reports/profit-loss', [ReportController::class, 'profitAndLoss'])
         ->name('api.v1.reports.profit-loss');
 

@@ -19,55 +19,45 @@
         </div>
       </div>
 
-      <!-- Quick Metrics Cards (Clean Modern Box Style) -->
+      <!-- Quick Metrics Cards (current month, calculated by backend) -->
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider">Ringkasan Bulan Ini</h2>
+        <span class="text-xs font-bold text-slate-500">{{ currentMonthLabel }}</span>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <!-- Pemasukan -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
-          <div class="space-y-1">
-            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-              Pemasukan (Credit)
-            </span>
-            <h3 class="text-xl font-black text-slate-900 tracking-tight">
-              {{ loading ? '...' : formatCurrency(reportSummary?.total_income || 0) }}
-            </h3>
-            <p class="text-[11px] text-slate-400">Total akumulasi periode</p>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xl border border-emerald-500/20">
-            &darr;
-          </div>
-        </div>
+        <!-- Total Income = SUM(credit) -->
+        <MetricCard
+          title="Total Income (Credit)"
+          :value="formatCurrency(summary?.total_income || 0)"
+          :sublabel="`${summary?.credit_count ?? 0} transaksi credit`"
+          :loading="loading"
+          badge-class="bg-emerald-50 text-emerald-700 border-emerald-200/80"
+          icon-box-class="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+          icon-symbol="&darr;"
+        />
 
-        <!-- Pengeluaran -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
-          <div class="space-y-1">
-            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-rose-50 text-rose-700 border border-rose-200/80">
-              Pengeluaran (Debit)
-            </span>
-            <h3 class="text-xl font-black text-slate-900 tracking-tight">
-              {{ loading ? '...' : formatCurrency(reportSummary?.total_expense || 0) }}
-            </h3>
-            <p class="text-[11px] text-slate-400">Total akumulasi periode</p>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-bold text-xl border border-rose-500/20">
-            &uarr;
-          </div>
-        </div>
+        <!-- Total Expense = SUM(debit) -->
+        <MetricCard
+          title="Total Expense (Debit)"
+          :value="formatCurrency(summary?.total_expense || 0)"
+          :sublabel="`${summary?.debit_count ?? 0} transaksi debit`"
+          :loading="loading"
+          badge-class="bg-rose-50 text-rose-700 border-rose-200/80"
+          icon-box-class="bg-rose-500/10 text-rose-600 border-rose-500/20"
+          icon-symbol="&uarr;"
+        />
 
-        <!-- Net Income -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
-          <div class="space-y-1">
-            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-orange-50 text-orange-600 border border-orange-200/80">
-              Net Income
-            </span>
-            <h3 class="text-xl font-black tracking-tight" :class="(reportSummary?.net_income || 0) >= 0 ? 'text-blue-700' : 'text-rose-700'">
-              {{ loading ? '...' : formatCurrency(reportSummary?.net_income || 0) }}
-            </h3>
-            <p class="text-[11px] text-slate-400">Laba Bersih Operasional</p>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold text-xl border border-orange-500/20">
-            &starf;
-          </div>
-        </div>
+        <!-- Net Income = credit - debit -->
+        <MetricCard
+          title="Net Income"
+          :value="formatCurrency(summary?.net_income || 0)"
+          sublabel="Credit &minus; Debit"
+          :loading="loading"
+          badge-class="bg-orange-50 text-orange-600 border-orange-200/80"
+          icon-box-class="bg-orange-500/10 text-orange-600 border-orange-500/20"
+          icon-symbol="&starf;"
+          :value-color-class="(summary?.net_income || 0) >= 0 ? 'text-blue-700' : 'text-rose-700'"
+        />
       </div>
 
       <!-- Feature Shortcut Cards (Modern Card Grid Look) -->
@@ -133,78 +123,84 @@
       </div>
 
       <!-- Recent Transactions Table Card -->
-      <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <DataTableCard>
+        <template #header>
           <div>
-            <h3 class="font-extrabold text-slate-900 text-sm">Histori Transaksi Terkini</h3>
-            <p class="text-xs text-slate-400">Pencatatan mutasi kredit dan debit</p>
+            <h3 class="font-extrabold text-slate-900 text-sm">Transaksi Bulan Ini</h3>
+            <p class="text-xs text-slate-400">Mutasi credit dan debit {{ currentMonthLabel }}</p>
           </div>
           <NuxtLink to="/transactions" class="text-xs font-bold text-sky-600 hover:text-sky-700">
             Lihat Semua &rarr;
           </NuxtLink>
-        </div>
+        </template>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider border-b border-slate-200/60 font-bold">
-              <tr>
-                <th class="px-6 py-3">Tanggal</th>
-                <th class="px-6 py-3">COA Kode</th>
-                <th class="px-6 py-3">Nama Akun & Kategori</th>
-                <th class="px-6 py-3">Keterangan</th>
-                <th class="px-6 py-3 text-right">Debit (Expense)</th>
-                <th class="px-6 py-3 text-right">Credit (Income)</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-slate-700">
-              <tr v-if="loading">
-                <td colspan="6" class="px-6 py-8 text-center text-slate-400 text-xs">Memuat data transaksi...</td>
-              </tr>
-              <tr v-else-if="!recentTransactions.length">
-                <td colspan="6" class="px-6 py-8 text-center text-slate-400 text-xs">Belum ada transaksi</td>
-              </tr>
-              <tr v-for="tx in recentTransactions" :key="tx.id" class="hover:bg-slate-50/70 transition-colors">
-                <td class="px-6 py-3.5 text-xs font-medium text-slate-600">{{ formatDate(tx.date) }}</td>
-                <td class="px-6 py-3.5 text-xs font-mono font-bold text-slate-900">{{ tx.coa?.code || '-' }}</td>
-                <td class="px-6 py-3.5 text-xs">
-                  <div class="font-bold text-slate-800">{{ tx.coa?.name || '-' }}</div>
-                  <div class="text-[10px] text-slate-400">{{ tx.coa?.category?.name || '-' }}</div>
-                </td>
-                <td class="px-6 py-3.5 text-xs text-slate-600">{{ tx.description }}</td>
-                <td class="px-6 py-3.5 text-xs text-right font-bold text-rose-600">
-                  {{ tx.debit > 0 ? formatCurrency(tx.debit) : '-' }}
-                </td>
-                <td class="px-6 py-3.5 text-xs text-right font-bold text-emerald-600">
-                  {{ tx.credit > 0 ? formatCurrency(tx.credit) : '-' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider border-b border-slate-200/60 font-bold">
+            <tr>
+              <th class="px-6 py-3">Tanggal</th>
+              <th class="px-6 py-3">COA Kode</th>
+              <th class="px-6 py-3">Nama Akun & Kategori</th>
+              <th class="px-6 py-3">Keterangan</th>
+              <th class="px-6 py-3 text-right">Debit (Expense)</th>
+              <th class="px-6 py-3 text-right">Credit (Income)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-700">
+            <tr v-if="loading">
+              <td colspan="6" class="px-6 py-8 text-center text-slate-400 text-xs">Memuat data transaksi...</td>
+            </tr>
+            <tr v-else-if="!recentTransactions.length">
+              <td colspan="6" class="px-6 py-8 text-center text-slate-400 text-xs">Belum ada transaksi di bulan ini</td>
+            </tr>
+            <tr v-for="tx in recentTransactions" :key="tx.id" class="hover:bg-slate-50/70 transition-colors">
+              <td class="px-6 py-3.5 text-xs font-medium text-slate-600">{{ formatDate(tx.date) }}</td>
+              <td class="px-6 py-3.5 text-xs font-mono font-bold text-slate-900">{{ tx.coa?.code || '-' }}</td>
+              <td class="px-6 py-3.5 text-xs">
+                <div class="font-bold text-slate-800">{{ tx.coa?.name || '-' }}</div>
+                <div class="text-[10px] text-slate-400">{{ tx.coa?.category?.name || '-' }}</div>
+              </td>
+              <td class="px-6 py-3.5 text-xs text-slate-600">{{ tx.description }}</td>
+              <td class="px-6 py-3.5 text-xs text-right font-bold text-rose-600">
+                {{ tx.debit > 0 ? formatCurrency(tx.debit) : '-' }}
+              </td>
+              <td class="px-6 py-3.5 text-xs text-right font-bold text-emerald-600">
+                {{ tx.credit > 0 ? formatCurrency(tx.credit) : '-' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </DataTableCard>
     </div>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
-import type { ProfitLossReport, Transaction } from '~/types';
+import type { DashboardSummary, Transaction } from '~/types';
 import { formatCurrency, formatDate } from '~/utils/formatters';
 
 const api = useApi();
 
 const loading = ref(true);
-const reportSummary = ref<ProfitLossReport['summary'] | null>(null);
+const summary = ref<DashboardSummary | null>(null);
 const recentTransactions = ref<Transaction[]>([]);
+
+// Current month boundaries (local time) — only this month's data is shown.
+const now = new Date();
+const pad = (n: number) => String(n).padStart(2, '0');
+const currentMonth = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+const monthStart = `${currentMonth}-01`;
+const monthEnd = `${currentMonth}-${pad(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate())}`;
+const currentMonthLabel = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(now);
 
 onMounted(async () => {
   try {
-    const [reportRes, txRes] = await Promise.all([
-      api.get<ProfitLossReport>('/reports/profit-loss'),
-      api.get<Transaction[]>('/transactions', { per_page: 5 }),
+    const [summaryRes, txRes] = await Promise.all([
+      api.get<DashboardSummary>('/reports/dashboard-summary', { month: currentMonth }),
+      api.get<Transaction[]>('/transactions', { per_page: 5, start_date: monthStart, end_date: monthEnd }),
     ]);
 
-    if (reportRes.success && reportRes.data) {
-      reportSummary.value = reportRes.data.summary;
+    if (summaryRes.success && summaryRes.data) {
+      summary.value = summaryRes.data;
     }
     if (txRes.success && txRes.data) {
       recentTransactions.value = txRes.data;

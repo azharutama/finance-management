@@ -28,7 +28,6 @@ class UpdateCategoryRequest extends FormRequest
                 'max:100',
                 Rule::unique('categories', 'name')->ignore($category->id),
             ],
-            'type' => ['nullable', 'string', Rule::in([Category::TYPE_INCOME, Category::TYPE_EXPENSE])],
         ];
     }
 

@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class CategoryFilterRequest extends FormRequest
 {
@@ -20,7 +18,6 @@ class CategoryFilterRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:100'],
-            'type' => ['nullable', 'string', Rule::in([Category::TYPE_INCOME, Category::TYPE_EXPENSE])],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
             'all' => ['nullable', 'boolean'],

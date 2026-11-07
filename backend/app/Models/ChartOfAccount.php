@@ -19,14 +19,12 @@ class ChartOfAccount extends Model
         'code',
         'name',
         'category_id',
-        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
             'category_id' => 'integer',
-            'is_active' => 'boolean',
         ];
     }
 

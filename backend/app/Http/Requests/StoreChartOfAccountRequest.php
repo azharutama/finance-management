@@ -22,7 +22,6 @@ class StoreChartOfAccountRequest extends FormRequest
             'code' => ['required', 'string', 'max:30', Rule::unique('chart_of_accounts', 'code')],
             'name' => ['required', 'string', 'max:150'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
-            'is_active' => ['nullable', 'boolean'],
         ];
     }
 

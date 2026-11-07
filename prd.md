@@ -2,665 +2,323 @@
 
 # Financial Management System
 
-**Versi:** 1.1\
-**Status:** Draft -- siap menjadi acuan implementasi\
-**Stack:** Laravel REST API, Maatwebsite Laravel Excel (`maatwebsite/excel`), Nuxt.js, Vue.js, TypeScript, Tailwind CSS,
-MySQL
+**Versi:** 1.2  
+**Status:** Disetujui & Siap Menjadi Acuan Implementasi  
+**Stack:** Laravel REST API, Maatwebsite Laravel Excel (`maatwebsite/excel`), Nuxt.js, Vue.js, TypeScript, Tailwind CSS, MySQL  
 
-------------------------------------------------------------------------
+---
 
 ## 1. Ringkasan Proyek
 
-Financial Management System adalah aplikasi web untuk mengelola kategori
-keuangan, Chart of Accounts (COA), transaksi pemasukan dan pengeluaran,
-serta menghasilkan laporan Profit & Loss berdasarkan periode bulanan.
+Financial Management System adalah aplikasi web terintegrasi untuk mengelola master kategori keuangan, Chart of Accounts (COA), pencatatan transaksi pemasukan dan pengeluaran harian, serta menghasilkan laporan Profit & Loss bulanan dengan fitur export Excel terformat otomatis.
 
-Aplikasi terdiri dari dua aplikasi terpisah: - **Backend:** Laravel
-sebagai REST API, business logic, validasi, autentikasi, otorisasi, dan
-akses database. - **Frontend:** Nuxt.js dengan Vue.js dan TypeScript
-sebagai antarmuka pengguna. - **Database:** MySQL sebagai penyimpanan
-data utama.
+Aplikasi dibangun dengan arsitektur terpisah (*decoupled architecture*):
+- **Backend:** Laravel sebagai REST API murni yang bertanggung jawab penuh atas *business logic*, validasi, integritas data, penghitungan laporan keuangan, dan akses database.
+- **Frontend:** Nuxt.js dengan Vue 3 (Composition API), TypeScript (*strict mode*), dan Tailwind CSS sebagai antarmuka pengguna (*Single Page Application*).
+- **Database:** MySQL sebagai penyimpanan data relasional utama.
 
-Frontend tidak boleh menjadi sumber kebenaran untuk business rules
-keuangan. Perhitungan dan validasi penting harus dilakukan di backend.
+> [!IMPORTANT]
+> **Source of Truth:** Frontend tidak boleh menjadi sumber kebenaran untuk *business rules* atau perhitungan keuangan. Seluruh kalkulasi laporan, agregasi saldo, dan validasi integritas data wajib bersumber dari backend.
+
+---
 
 ## 2. Tujuan Produk
 
-1.  Memusatkan pengelolaan master kategori, COA, dan transaksi keuangan.
-2.  Mempermudah pencatatan pemasukan dan pengeluaran berdasarkan COA.
-3.  Menghasilkan laporan Profit & Loss per bulan.
-4.  Memungkinkan pengguna mengekspor laporan ke Excel.
-5.  Menyediakan aplikasi yang aman, konsisten, mudah dipelihara, dan
-    dapat dikembangkan.
+1. **Sentralisasi Master Data:** Menyediakan manajemen master kategori dan COA yang terstruktur, aman dari inkonsistensi, dan memiliki batasan relasi yang ketat.
+2. **Fleksibilitas Pencatatan Transaksi:** Memberikan kebebasan pencatatan debit dan credit pada level transaksi dengan kontrol integritas data yang kokoh.
+3. **Integritas dan Audit Trail:** Menjamin keamanan riwayat historis keuangan melalui strategi penghapusan bertingkat (*Restrict Delete* pada master data dan *Soft Delete* pada transaksi).
+4. **Otomatisasi Laporan Finansial:** Menghasilkan laporan Profit & Loss per bulan secara dinamis berdasarkan formula standar industri keuangan.
+5. **Ekspor Data Siap Pakai:** Menyediakan fitur unduh spreadsheet Excel (`.xlsx`) dengan penataan *layout*, warna, dan *number formatting* sesuai kebutuhan bisnis.
+
+---
 
 ## 3. Ruang Lingkup
 
-### 3.1 Fitur utama
+### 3.1 Fitur Utama
+- **Master Category:** Melihat, menambah, mengubah, dan menghapus kategori (menerapkan *Restrict Delete* bila masih memiliki akun COA).
+- **Master Chart of Account (COA):** Melihat, menambah, mengubah, menonaktifkan (*is_active = false*), serta menghapus akun COA (menerapkan *Restrict Delete* bila telah digunakan dalam riwayat transaksi).
+- **Transaction:** Melihat riwayat transaksi (dengan pagination dan filter), mencatat transaksi baru, mengubah data, serta menghapus transaksi menggunakan *Soft Delete* dengan dialog konfirmasi.
+- **Profit & Loss Report:** Menampilkan matriks ringkasan bulanan kategori pemasukan, total income, kategori pengeluaran, total expense, dan net income.
+- **Excel Export:** Mengekspor laporan Profit & Loss ke file format `.xlsx` menggunakan library `maatwebsite/excel` sesuai filter periode.
 
--   Master Category: melihat, menambah, mengubah, dan menghapus
-    kategori.
--   Master Chart of Account (COA): melihat, menambah, mengubah, dan
-    menghapus akun COA.
--   Transaction: melihat, menambah, mengubah, dan menghapus transaksi.
--   Profit & Loss Report: menampilkan ringkasan pemasukan, pengeluaran,
-    dan net income berdasarkan bulan/periode.
--   Excel Export: mengekspor laporan Profit & Loss sesuai filter
-    periode.
-### 3.2 Di luar ruang lingkup awal
+### 3.2 Di Luar Ruang Lingkup Awal
+- Autentikasi dan login (ditiadakan sesuai instruksi kebutuhan; aplikasi berjalan dalam mode *direct access* tunggal/internal).
+- Integrasi *bank feed* atau *payment gateway*.
+- *Multi-currency* (seluruh nominal diasumsikan dalam mata uang IDR).
+- Konsolidasi multi-perusahaan / multi-cabang.
+- Pembukuan *double-entry accounting* penuh dengan jurnal penyesuaian otomatis, kecuali jika diminta pada fase selanjutnya.
 
--   Fitur autentikasi dan login (dihilangkan sesuai permintaan pengguna; sistem berjalan dalam mode direct access).
--   Integrasi bank atau payment gateway.
--   Multi-currency.
--   Konsolidasi banyak perusahaan/cabang.
--   Akuntansi double-entry penuh, kecuali secara eksplisit ditambahkan
-    pada kebutuhan berikutnya.
+---
 
 ## 4. Acuan Data dan Aturan Bisnis
 
-Aplikasi mengikuti struktur data pada contoh spreadsheet yang diberikan.
+### 4.0 Standar Tampilan Tabel Antarmuka Pengguna (UI Grid Field Alignment)
+
+Sesuai spesifikasi lembar kerja acuan (spreadsheet), kolom/field yang disajikan pada tabel antarmuka pengguna (frontend) ditetapkan secara presisi: **tidak boleh kurang dan tidak boleh lebih**.
+
+1. **Master Kategori COA (1 Field Data):**
+   - Kolom tabel: `nama` (ditambah kolom Aksi operasional).
+   - Menghilangkan kolom tambahan seperti `Tipe Klasifikasi` atau `Jumlah Akun COA` dari tabel utama agar persis dengan format master kategori spreadsheet.
+2. **Master Chart of Account (3 Field Data):**
+   - Kolom tabel: `kode`, `nama`, `kategori` (ditambah kolom Aksi operasional).
+   - Menghilangkan kolom tambahan seperti `Jumlah Transaksi` atau status badge dari grid utama.
+3. **Transaksi (6 Field Data):**
+   - Kolom tabel: `Tanggal`, `COA Kode`, `COA Nama`, `Desc`, `Debit`, `Credit` (ditambah kolom Aksi operasional).
+   - `COA Kode` dan `COA Nama` dipisah menjadi dua kolom independen (tidak digabung dengan kategori).
+   - Nilai `Debit` dan `Credit` disajikan dalam dua kolom numerik terpisah sesuai format transaksi mutasi.
 
 ### 4.1 Master Category
 
-Master kategori menyimpan kelompok transaksi, misalnya: - Salary - Other
-Income - Family Expense - Transport Expense - Meal Expense
+Master kategori hanya berisi **nama** kelompok (contoh: *Salary*, *Other Income*, *Family Expense*, *Transport Expense*, *Meal Expense*). Kategori **tidak memiliki tipe** (income/expense); sisi pemasukan/pengeluaran sepenuhnya ditentukan oleh tipe transaksi (Credit/Debit).
 
-Nama kategori harus unik sesuai aturan bisnis yang ditetapkan.
+**Aturan Bisnis Kategori:**
+1. Nama kategori (`name`) bersifat unik (*case-insensitive unique*).
+2. Kategori tidak memiliki field `type` — baik di database, API, maupun form antarmuka. Klasifikasi pada laporan diturunkan dari data transaksi (Credit → pemasukan, Debit → pengeluaran).
+3. Field `is_active` dan `type` ditiadakan di tingkat migrasi tabel kategori agar persis 1:1 dengan format tabel lembar kerja.
+4. **Kebijakan Penghapusan (*Restrict Delete*):** Kategori dilarang dihapus jika masih menaungi satu atau lebih akun COA. Kategori hanya dapat dihapus secara fisik apabila belum memiliki relasi anak sama sekali. Jika ada upaya penghapusan kategori yang masih memiliki relasi COA, sistem wajib menolak dan mengembalikan HTTP status `409 Conflict`.
 
 ### 4.2 Master Chart of Account (COA)
 
-Setiap COA memiliki: - `code`: kode akun. - `name`: nama akun. -
-`category_id`: kategori yang menaungi akun.
+Setiap akun COA memiliki atribut data:
+- `code`: Kode akun unik (contoh: `401`, `402`, `601`, `602`).
+- `name`: Nama akun (contoh: *Gaji Karyawan*, *Biaya Sekolah*, *Bensin*).
+- `category_id`: Referensi relasi ke master kategori.
 
-Contoh: - 401 -- Gaji Karyawan -- Salary - 402 -- Gaji Ketua MPR --
-Salary - 403 -- Profit Trading -- Other Income - 601 -- Biaya Sekolah --
-Family Expense - 602 -- Bensin -- Transport Expense - 603 -- Parkir --
-Transport Expense - 604 -- Makan Siang -- Meal Expense - 605 -- Makanan
-Pokok Bulanan -- Meal Expense
-
-Aturan: - Kode COA harus unik. - COA harus terhubung dengan kategori
-yang valid. - COA yang sudah digunakan transaksi tidak boleh dihapus
-secara sembarangan. Gunakan soft delete, penonaktifan, atau larangan
-penghapusan sesuai keputusan implementasi. - Perubahan master tidak
-boleh merusak histori transaksi.
+**Aturan Bisnis COA:**
+1. Kode akun (`code`) bersifat unik.
+2. Setiap COA wajib terhubung dengan `category_id` yang valid.
+3. Akun COA dapat dipindahkan ke kategori lain kapan saja karena kategori tidak memiliki tipe.
+4. **Kebijakan Penghapusan (*Restrict Delete*):**
+   - Pada tingkat database, foreign key dari transaksi ke COA menggunakan aturan `ON DELETE RESTRICT`.
+   - Akun COA yang **sudah pernah digunakan dalam transaksi tidak boleh dihapus secara fisik** dan akan ditolak (HTTP `409 Conflict`).
+   - Akun COA yang **belum pernah digunakan** dalam transaksi apa pun diizinkan untuk dihapus secara aman.
 
 ### 4.3 Transaction
 
-Setiap transaksi minimal menyimpan: - Tanggal transaksi. - Referensi
-COA. - Deskripsi. - Debit. - Credit.
+Transaksi mencatat mutasi keuangan harian dengan fleksibilitas penuh di level baris transaksi.
 
-Aturan penting berdasarkan spreadsheet: - Transaksi pemasukan dicatat
-pada kolom **Credit**. - Transaksi pengeluaran dicatat pada kolom
-**Debit**. - Satu transaksi hanya boleh memiliki salah satu nilai debit
-atau credit yang lebih besar dari nol. - Nilai nominal tidak boleh
-negatif. - Transaksi harus mengacu pada COA yang valid dan aktif. -
-Nama/kode COA pada tampilan dapat diperoleh melalui relasi COA, bukan
-dipercaya dari input bebas pengguna. - Zona waktu dan format tanggal
-harus konsisten antara frontend, backend, dan database.
+Atribut transaksi:
+- `date`: Tanggal terjadinya transaksi (`YYYY-MM-DD`).
+- `coa_id`: Akun COA yang bersangkutan.
+- `description`: Deskripsi rincian transaksi, sekaligus berfungsi sebagai penjelas alasan jika terdapat transaksi penyesuaian atau koreksi saldo (seperti potongan gaji, diskon, pengembalian/retur belanja).
+- `debit`: Nominal sisi debit (`decimal(15, 2)`, default: `0.00`).
+- `credit`: Nominal sisi credit (`decimal(15, 2)`, default: `0.00`).
+- `deleted_at`: Timestamp penanda *soft delete*.
 
-**Catatan domain:** pola debit/credit pada spreadsheet ini digunakan
-sebagai klasifikasi pemasukan dan pengeluaran sesuai kebutuhan aplikasi.
-Jangan mengasumsikan sistem sudah menerapkan prinsip double-entry
-accounting atau aturan saldo akuntansi lengkap tanpa kebutuhan bisnis
-tambahan.
+**Aturan Bisnis Transaksi & Fleksibilitas Debit/Credit:**
+1. **Penempatan Kolom Murni di Transaksi:** Kolom `debit` dan `credit` hanya berada di tabel `transactions`. Kategori dan COA tidak mengunci apakah transaksi wajib berada di sisi debit atau credit secara mutlak, melainkan memberikan fleksibilitas penuh untuk mencatat transaksi penyesuaian/koreksi.
+2. **Validasi Eksklusifitas Nominal:**
+   - Dalam satu baris transaksi, **minimal salah satu dari nilai debit atau credit harus bernilai lebih besar dari 0**.
+   - **Tidak boleh kedua sisi terisi bersamaan** (jika `debit > 0`, maka `credit` wajib `0`, dan sebaliknya jika `credit > 0`, maka `debit` wajib `0`).
+   - Nilai debit maupun credit **tidak boleh negatif** (`>= 0.00`).
+   - Kondisi `debit == 0 && credit == 0` dinyatakan tidak valid (HTTP `422 Unprocessable Entity`).
+3. **Kebijakan Penghapusan Transaksi (*Soft Delete*):**
+   - Penghapusan transaksi menerapkan mekanisme **Soft Delete** (`deleted_at IS NOT NULL`).
+   - Data transaksi yang dihapus tidak dihilangkan secara fisik dari tabel database demi keamanan jejak audit (*audit trail*).
+   - Di antarmuka pengguna (frontend), proses penghapusan wajib didahului dengan **dialog/modal konfirmasi** eksplisit untuk mencegah penghapusan yang tidak disengaja.
 
-### 4.4 Profit & Loss
+### 4.4 Profit & Loss Report
 
-Laporan ditampilkan berdasarkan kategori dan periode bulanan.
+Laporan Profit & Loss menyajikan ringkasan kinerja keuangan bulanan yang dikelompokkan berdasarkan kategori.
 
-Rumus dasar: - Total Income = jumlah nilai Credit untuk kategori
-pemasukan pada periode. - Total Expense = jumlah nilai Debit untuk
-kategori pengeluaran pada periode. - Net Income = Total Income - Total
-Expense.
+**Logika Agregasi Perhitungan Berdasarkan Tipe Transaksi:**
+1. **Penentuan Kategori Berdasarkan Tipe Transaksi (Kredit vs Debit):**
+   - **Kategori Pemasukan (*Credit Categories*):** Mengambil semua kategori yang memiliki transaksi bertipe **kredit** (`credit > 0`). Kategori-kategori ini dihitung (*count/sum*) per bulan dengan formula $\sum(\text{credit} - \text{debit})$.
+   - **Kategori Pengeluaran (*Debit Categories*):** Mengambil semua kategori yang memiliki transaksi bertipe **debit** (`debit > 0`). Kategori-kategori ini dihitung per bulan dengan formula $\sum(\text{debit} - \text{credit})$.
+2. **Perhitungan Total Bulanan:**
+   - **Total Income:** Diambil dari penjumlahan nominal seluruh kategori bertipe kredit pada bulan bersangkutan.
+   - **Total Expense:** Diambil dari penjumlahan nominal seluruh kategori bertipe debit pada bulan bersangkutan.
+   - **Net Income (Laba/Rugi Bersih):** $\text{Net Income} = \text{Total Income} - \text{Total Expense}$.
+3. Perhitungan wajib **mengabaikan transaksi yang berstatus soft-deleted** (`deleted_at IS NULL`).
+4. Periode laporan dapat difilter berdasarkan rentang bulan awal (`start_month`, format: `YYYY-MM`) dan bulan akhir (`end_month`, format: `YYYY-MM`). Bulan dalam rentang yang tidak memiliki mutasi transaksi tetap dimunculkan dengan nilai `0`.
+5. Hasil ekspor Excel (`.xlsx`) wajib identik secara presisi dengan angka dan periode yang tampil di layar.
 
-Aturan: - Pengelompokan transaksi mengikuti kategori COA. - Filter
-periode menggunakan rentang tanggal yang jelas. - Bulan tanpa transaksi
-tetap dapat ditampilkan dengan nilai nol jika dibutuhkan tampilan
-laporan. - Nilai laporan harus dihitung backend dan menjadi sumber data
-frontend. - Total per kategori dan total keseluruhan harus konsisten. -
-Export Excel harus mengikuti filter dan hasil perhitungan yang sama
-dengan laporan di layar.
+
+---
 
 ## 5. Pengguna dan Hak Akses
 
-Sesuai instruksi pengguna, fitur login dan autentikasi ditiadakan sehingga sistem dapat langsung digunakan tanpa sesi login. Seluruh pengguna memiliki akses penuh ke fitur pengelolaan Category, COA, Transaksi, Laporan, dan Export Excel.
+Sesuai arahan kebutuhan proyek:
+- Fitur login dan autentikasi ditiadakan (*mode direct access*).
+- Aplikasi dapat langsung diakses dan digunakan tanpa sesi autentikasi.
+- Seluruh pengguna memiliki akses penuh (*full access*) untuk mengelola Master Kategori, Master COA, Transaksi Keuangan, melihat Laporan Profit & Loss, dan mengunduh berkas Excel.
+
+---
 
 ## 6. Kebutuhan Fungsional
 
-  -------------------------------------------------------------------------
-  ID                      Fitur                   Kebutuhan
-  ----------------------- ----------------------- -------------------------
-  FR-01                   Category                Melihat daftar kategori
+| ID | Modul | Kebutuhan Fungsional | Aturan / Validasi Terkait |
+| :--- | :--- | :--- | :--- |
+| **FR-01** | Category | Melihat daftar seluruh kategori | Menampilkan tabel persis 1 field: `nama` (ditambah tombol aksi operasional), tanpa field berlebih. |
+| **FR-02** | Category | Menambah kategori baru | Hanya field nama (unik). Tidak ada pilihan tipe. |
+| **FR-03** | Category | Mengubah kategori | Hanya field nama (unik, mengabaikan self-ID). |
+| **FR-04** | Category | Menghapus kategori | **Restrict Delete:** Ditolak (HTTP 409) jika masih memiliki relasi ke COA. |
+| **FR-05** | COA | Melihat daftar akun COA | Menampilkan tabel persis 3 field: `kode`, `nama`, `kategori` (ditambah tombol aksi operasional), tanpa field berlebih. |
+| **FR-06** | COA | Menambah akun COA baru | Kode unik, nama wajib, kategori wajib valid. |
+| **FR-07** | COA | Mengubah akun COA | Kode unik (mengabaikan self-ID), nama, dan kategori. |
+| **FR-08** | COA | Menghapus akun COA | **Restrict Delete:** Ditolak (HTTP 409) jika sudah memiliki riwayat transaksi tercatat. |
+| **FR-09** | Transaction | Melihat daftar mutasi transaksi | Menampilkan tabel persis 6 field: `Tanggal`, `COA Kode`, `COA Nama`, `Desc`, `Debit`, `Credit` (ditambah tombol aksi operasional). Mengabaikan data soft-deleted. |
+| **FR-10** | Transaction | Mencatat transaksi baru | Salah satu dari debit/credit > 0, tidak boleh keduanya > 0, COA wajib valid, deskripsi penjelas. |
+| **FR-11** | Transaction | Mengubah transaksi | Validasi nominal eksklusif tetap berlaku, tanggal dan deskripsi dapat diperbarui. |
+| **FR-12** | Transaction | Menghapus transaksi | **Soft Delete:** Mengisi kolom `deleted_at`. Wajib konfirmasi modal di antarmuka sebelum eksekusi. |
+| **FR-13** | Report | Melihat Laporan Profit & Loss | Matriks kategori vs bulan, formula `SUM(credit - debit)` dan `SUM(debit - credit)`. |
+| **FR-14** | Report | Memfilter periode laporan | Filter rentang bulan (`start_month` s.d. `end_month`). |
+| **FR-15** | Export | Export Excel Profit & Loss | Mengunduh file `.xlsx` dengan styling tabel spreadsheet via `maatwebsite/excel`. |
 
-  FR-02                   Category                Menambah kategori
-
-  FR-03                   Category                Mengubah kategori
-
-  FR-04                   Category                Menghapus/menonaktifkan
-                                                  kategori sesuai aturan
-                                                  relasi
-
-  FR-05                   COA                     Melihat daftar COA
-                                                  beserta kategori
-
-  FR-06                   COA                     Menambah COA
-
-  FR-07                   COA                     Mengubah COA
-
-  FR-08                   COA                     Menghapus/menonaktifkan
-                                                  COA sesuai aturan relasi
-
-  FR-09                   Transaction             Melihat daftar transaksi
-
-  FR-10                   Transaction             Menambah transaksi
-
-  FR-11                   Transaction             Mengubah transaksi
-
-  FR-12                   Transaction             Menghapus transaksi
-
-  FR-13                   Transaction             Memfilter transaksi
-                                                  berdasarkan periode, COA,
-                                                  atau kategori
-
-  FR-14                   Report                  Melihat laporan Profit &
-                                                  Loss per bulan
-
-  FR-15                   Report                  Melihat total income,
-                                                  expense, dan net income
-
-  FR-16                   Report                  Memfilter laporan
-                                                  berdasarkan periode
-
-  FR-17                   Export                  Mengunduh laporan Profit
-                                                  & Loss dalam format Excel
-
-  FR-18                   Auth                    Login dan logout sesuai
-                                                  strategi autentikasi yang
-                                                  dipilih
-  -------------------------------------------------------------------------
+---
 
 ## 7. Kebutuhan Non-Fungsional
 
--   Keamanan: validasi server-side, autentikasi, authorization,
-    perlindungan dari SQL injection dan XSS, serta konfigurasi CORS/CSRF
-    yang benar.
--   Maintainability: pemisahan tanggung jawab, clean code, dan struktur
-    modular.
--   Performance: pagination, indexing, eager loading, pemilihan kolom
-    seperlunya, dan query agregasi database.
--   Reliability: transaksi database untuk operasi atomik dan penanganan
-    concurrency.
--   Usability: UI konsisten, responsif, serta menyediakan loading,
-    empty, success, dan error states.
--   Testability: unit test dan feature test backend serta
-    unit/component/E2E test frontend sesuai risiko fitur.
+- **Integritas Data:** Penggunaan constraint database *Foreign Key Restrict*, transaksi database atomik (`DB::transaction()`), dan *pessimistic locking* (`lockForUpdate()`) untuk mutasi yang rawan *race condition*.
+- **Performance:** Penerapan pagination pada semua list, penggunaan index komposit (`date`, `coa_id`, `category_id`), eager loading relasi untuk mencegah problem N+1 query, serta agregasi SQL langsung pada laporan.
+- **Maintainability:** Pemisahan tanggung jawab yang tegas antara Controllers, Form Requests, Services, Models, dan API Client sesuai standar *Clean Architecture*.
+- **Usability:** Antarmuka responsif, modern, *eye-friendly* (*soft muted palette*), dilengkapi *loading skeleton/indicator*, *empty state*, dan dialog konfirmasi interaktif.
 
-------------------------------------------------------------------------
+---
 
-# 8. Backend Engineering Standards
+# 8. Backend Engineering Standards (Laravel)
 
-## 8.1 Arsitektur dan pemisahan tanggung jawab
+## 8.1 Arsitektur dan Pemisahan Tanggung Jawab
 
-Backend menggunakan Laravel sebagai REST API dengan prinsip separation
-of concerns.
+Backend Laravel dibangun dengan pola service-oriented REST API:
+- **Routes (`routes/api.php`):** Hanya mendefinisikan URL endpoint, HTTP method, dan middleware rate limiting (prefix `/api/v1`).
+- **Controllers (`app/Http/Controllers/Api/V1/`):** Bertanggung jawab menerima HTTP request, mengeksekusi Form Request, mendelegasikan proses ke Service, dan mengembalikan JSON response via `ApiResponse`. Controller bebas dari *business logic* database langsung.
+- **Form Requests (`app/Http/Requests/`):** Bertanggung jawab memvalidasi payload request dan tipe data.
+- **Services (`app/Services/`):** Mengelola seluruh alur bisnis, kalkulasi keuangan, transaksi database (`DB::transaction`), dan pengecekan aturan domain.
+- **Exports (`app/Exports/`):** Mengelola pembuatan berkas Excel menggunakan `Maatwebsite\Excel` (`WithHeadings`, `WithStyles`, `ShouldAutoSize`).
+- **Models (`app/Models/`):** Merepresentasikan tabel database, relasi Eloquent, dan *trait* (`SoftDeletes`).
 
-Struktur tanggung jawab: - **Routes:** mendefinisikan endpoint dan
-middleware. - **Controllers:** menerima request, memanggil service, dan
-mengembalikan response. Controller tidak menampung business logic
-kompleks. - **Form Requests:** menangani validasi input dan
-authorization request-level bila sesuai. - **Services:** menampung
-business logic dan orkestrasi proses bisnis. - **Exports:** menangani
-format dan styling export Excel menggunakan `maatwebsite/excel`. - **Models:**
-merepresentasikan entitas dan relasi Eloquent. - **Helpers:** menyediakan
-helper terpusat seperti `ApiResponse`.
-
-Contoh struktur:
-
-``` text
-backend/
-└── app/
-    ├── Exports/
-    ├── Helpers/
-    ├── Http/
-    │   ├── Controllers/Api/V1/
-    │   └── Requests/
-    ├── Models/
-    └── Services/
+```text
+backend/app/
+├── Exports/
+│   └── ProfitAndLossExport.php
+├── Helpers/
+│   └── ApiResponse.php
+├── Http/
+│   ├── Controllers/Api/V1/
+│   │   ├── CategoryController.php
+│   │   ├── ChartOfAccountController.php
+│   │   ├── TransactionController.php
+│   │   └── ReportController.php
+│   └── Requests/
+│       ├── CategoryFilterRequest.php
+│       ├── ChartOfAccountFilterRequest.php
+│       ├── TransactionFilterRequest.php
+│       ├── ProfitLossReportRequest.php
+│       ├── StoreCategoryRequest.php
+│       ├── UpdateCategoryRequest.php
+│       ├── StoreChartOfAccountRequest.php
+│       ├── UpdateChartOfAccountRequest.php
+│       ├── StoreTransactionRequest.php
+│       └── UpdateTransactionRequest.php
+├── Models/
+│   ├── Category.php
+│   ├── ChartOfAccount.php
+│   └── Transaction.php
+└── Services/
+    ├── CategoryService.php
+    ├── ChartOfAccountService.php
+    ├── TransactionService.php
+    └── ProfitAndLossService.php
 ```
 
-Jangan membuat layer atau class hanya demi mengikuti pola. Tambahkan
-abstraksi ketika memang mengurangi coupling atau kompleksitas.
+## 8.2 Skema Migrasi Database (Laravel Blueprint)
 
-## 8.2 Validasi
+Skema migrasi database dirancang persis sesuai field lembar kerja (*spreadsheet*): **tidak kurang dan tidak lebih**. Seluruh kolom non-esensial (seperti `type` fisik pada kategori, `is_active` pada COA, dan `created_by` pada transaksi) ditiadakan dari skema database agar selaras 100% dengan tabel acuan.
 
--   Seluruh validasi penting wajib dilakukan di backend menggunakan
-    Laravel Form Request.
--   Jangan mengandalkan validasi frontend sebagai perlindungan data.
--   Validasi tipe, panjang, format, rentang nominal, keunikan, dan
-    foreign key.
--   Validasi aturan debit/credit: salah satu sisi harus bernilai positif
-    dan sisi lainnya nol.
--   Gunakan pesan validasi yang konsisten dan mudah dipahami.
--   Validasi ulang seluruh input yang berasal dari client, termasuk
-    query parameter dan filter.
+### 1. Migrasi Tabel `categories`
+```php
+Schema::create('categories', function (Blueprint $table) {
+    $table->id();
+    $table->string('name', 100)->unique();
+    $table->timestamps();
+});
+```
 
-## 8.3 Keamanan backend
+### 2. Migrasi Tabel `chart_of_accounts`
+```php
+Schema::create('chart_of_accounts', function (Blueprint $table) {
+    $table->id();
+    $table->string('code', 30)->unique();
+    $table->string('name', 150);
+    $table->foreignId('category_id')
+          ->constrained('categories')
+          ->onDelete('restrict'); // Mencegah hapus kategori jika masih menaungi akun COA
+    $table->timestamps();
 
--   Gunakan Eloquent atau Query Builder dengan parameter binding;
-    hindari raw SQL yang menggabungkan input pengguna.
--   Jika raw SQL diperlukan, gunakan binding parameter dan tinjau secara
-    khusus.
--   Terapkan authentication dan authorization pada endpoint privat.
--   Hash password menggunakan mekanisme Laravel yang direkomendasikan.
--   Lindungi aplikasi dari mass assignment dengan `$fillable` atau
-    `$guarded` yang tepat.
--   Jangan mengekspos stack trace, credential, token, atau detail
-    internal pada production response.
--   Simpan secret di environment variable/secret manager, bukan
-    repository.
--   Terapkan rate limiting pada endpoint yang relevan, terutama
-    autentikasi.
--   Atur CORS, CSRF, cookie, dan HTTPS sesuai strategi
-    autentikasi/deployment.
--   Batasi ukuran payload, tipe file, dan validasi file jika fitur
-    upload ditambahkan.
--   Gunakan prinsip least privilege untuk akun database.
--   Catat aktivitas penting tanpa mencatat password, token, atau data
-    sensitif.
+    $table->index('category_id');
+});
+```
 
-## 8.4 Database design dan integrity
+### 3. Migrasi Tabel `transactions`
+```php
+Schema::create('transactions', function (Blueprint $table) {
+    $table->id();
+    $table->date('date')->index();
+    $table->foreignId('coa_id')
+          ->constrained('chart_of_accounts')
+          ->onDelete('restrict'); // Mencegah hapus fisik COA jika sudah ada riwayat transaksi
+    $table->string('description', 255);
+    $table->decimal('debit', 15, 2)->default(0.00);
+    $table->decimal('credit', 15, 2)->default(0.00);
+    $table->timestamps();
+    $table->softDeletes(); // Kolom deleted_at untuk keamanan jejak audit transaksi
 
--   Gunakan migration untuk seluruh perubahan skema.
--   Tentukan primary key, foreign key, unique constraint, dan nullable
-    constraint secara eksplisit.
--   Gunakan tipe data yang sesuai untuk nominal uang dan tanggal.
--   Hindari menyimpan data turunan yang dapat dihitung kecuali ada
-    alasan performa yang terukur.
--   Pastikan penghapusan master tidak merusak histori transaksi.
+    $table->index(['date', 'coa_id']);
+    $table->index('deleted_at');
+});
+```
 
-## 8.5 Database performance
+## 8.3 Validasi Transaksi (Form Request)
 
--   Gunakan pagination pada endpoint list; jangan mengambil seluruh data
-    tanpa batas.
--   Tambahkan index berdasarkan pola query nyata, seperti tanggal
-    transaksi, foreign key COA, dan kolom filter yang sering digunakan.
--   Hindari index berlebihan karena menambah biaya write dan storage.
--   Gunakan eager loading (`with`) untuk relasi yang diperlukan guna
-    mencegah N+1.
--   Pilih kolom yang dibutuhkan saja.
--   Gunakan agregasi SQL untuk perhitungan laporan yang sesuai.
--   Evaluasi query menggunakan `EXPLAIN` dan profiling sebelum melakukan
-    optimasi.
--   Gunakan cache hanya jika diperlukan dan tentukan strategi
-    invalidasinya.
+Pengecekan aturan debit dan credit dieksekusi secara ketat pada backend:
+```php
+// Pada StoreTransactionRequest / UpdateTransactionRequest
+public function withValidator($validator): void
+{
+    $validator->after(function ($v) {
+        $debit = (float) $this->input('debit', 0);
+        $credit = (float) $this->input('credit', 0);
 
-## 8.6 Transaction dan concurrency
+        if ($debit < 0 || $credit < 0) {
+            $v->errors()->add('nominal', 'Nilai debit maupun credit tidak boleh bernilai negatif.');
+            return;
+        }
 
--   Gunakan `DB::transaction()` untuk operasi multi-query yang harus
-    berhasil atau gagal sebagai satu kesatuan.
--   Terapkan unique constraint untuk mencegah data duplikat pada level
-    database.
--   Untuk proses read-modify-write yang rawan konflik, gunakan locking
-    yang sesuai seperti `lockForUpdate()` di dalam database transaction.
--   Tentukan urutan penguncian yang konsisten untuk mengurangi risiko
-    deadlock.
--   Gunakan idempotency key bila operasi yang sama berpotensi dikirim
-    ulang dan dapat menimbulkan duplikasi.
--   Jangan menganggap frontend disable button sebagai perlindungan race
-    condition.
--   Tambahkan concurrency test untuk alur yang berisiko jika relevan.
+        if ($debit == 0 && $credit == 0) {
+            $v->errors()->add('nominal', 'Minimal salah satu dari debit atau credit harus lebih besar dari 0.');
+            return;
+        }
 
-## 8.7 Standard API Response
+        if ($debit > 0 && $credit > 0) {
+            $v->errors()->add('nominal', 'Debit dan credit tidak boleh diisi bersamaan dalam satu baris transaksi.');
+            return;
+        }
 
-Semua endpoint harus mengembalikan format JSON yang konsisten melalui
-API Response helper/kelas terpusat. Jangan menduplikasi format response
-di setiap controller.
+        $coa = ChartOfAccount::find($this->input('coa_id'));
+        if (! $coa || ! $coa->is_active) {
+            $v->errors()->add('coa_id', 'Akun COA yang dipilih tidak aktif atau tidak ditemukan.');
+        }
+    });
+}
+```
 
-Struktur sukses:
+## 8.4 Standard Format API Response
 
-``` json
+Seluruh endpoint menghasilkan struktur JSON terstandarisasi melalui helper `ApiResponse`:
+
+```json
+// Sukses (Single / Collection)
 {
   "success": true,
   "status": 200,
-  "message": "Request processed successfully.",
+  "message": "Data retrieved successfully.",
   "data": {},
   "meta": null,
   "errors": null
 }
-```
 
-Struktur gagal:
-
-``` json
-{
-  "success": false,
-  "status": 422,
-  "message": "The given data was invalid.",
-  "data": null,
-  "meta": null,
-  "errors": {
-    "name": ["The name field is required."]
-  }
-}
-```
-
-Status HTTP yang harus ditangani secara konsisten:
-
-  Status   Nama                     Penggunaan
-  -------- ------------------------ ---------------------------------------------
-  200      OK                       Request berhasil
-  201      Created                  Resource berhasil dibuat
-  202      Accepted                 Proses diterima untuk diproses asynchronous
-  204      No Content               Berhasil tanpa response body
-  400      Bad Request              Request tidak valid secara umum
-  401      Unauthorized             Belum terautentikasi
-  403      Forbidden                Tidak memiliki izin
-  404      Not Found                Resource tidak ditemukan
-  405      Method Not Allowed       HTTP method tidak didukung
-  409      Conflict                 Konflik data atau state
-  413      Payload Too Large        Payload melebihi batas
-  415      Unsupported Media Type   Content type tidak didukung
-  422      Unprocessable Entity     Validasi gagal
-  429      Too Many Requests        Rate limit terlampaui
-  500      Internal Server Error    Kesalahan internal tak terduga
-  502      Bad Gateway              Gateway menerima response tidak valid
-  503      Service Unavailable      Layanan sementara tidak tersedia
-  504      Gateway Timeout          Gateway timeout
-
-Catatan: - Status HTTP aktual harus sesuai dengan status pada body. -
-Response 204 tidak boleh dipaksakan memiliki body. - Jangan mengirim
-detail exception internal kepada client. - Format `meta` digunakan untuk
-pagination atau metadata lain yang relevan. - Format `errors` digunakan
-untuk detail error terstruktur.
-
-## 8.8 Testing backend
-
-Gunakan PHPUnit atau Pest sesuai pilihan project.
-
--   Unit test untuk service dan fungsi bisnis yang dapat diuji secara
-    terisolasi.
--   Feature test untuk setiap endpoint dan alur fitur.
--   Uji validasi positif dan negatif.
--   Uji authentication dan authorization.
--   Uji response status serta struktur JSON.
--   Uji relasi, constraint, dan integritas data.
--   Uji perhitungan Profit & Loss dengan dataset yang mencakup
-    pemasukan, pengeluaran, bulan kosong, dan batas periode.
--   Uji export Excel.
--   Uji transaksi rollback dan concurrency untuk proses yang relevan.
--   Gunakan database testing terpisah, misalnya SQLite in-memory atau
-    database testing khusus yang kompatibel dengan fitur yang diuji.
--   Jangan menguji detail implementasi internal jika perilaku eksternal
-    sudah cukup.
-
-------------------------------------------------------------------------
-
-# 9. Frontend Engineering Standards
-
-## 9.1 Technology standards
-
--   Nuxt.js sebagai framework aplikasi frontend.
--   Vue.js dengan Composition API.
--   TypeScript dengan strict mode.
--   Tailwind CSS untuk styling.
--   REST API Laravel sebagai sumber data utama.
--   Gunakan `<script setup lang="ts">` untuk komponen Vue.
--   Gunakan library tambahan hanya jika memberikan manfaat yang jelas.
-
-## 9.2 Frontend architecture dan separation of concerns
-
-Pisahkan tanggung jawab berdasarkan jenis kode:
-
-  -----------------------------------------------------------------------
-  Layer                               Tanggung jawab
-  ----------------------------------- -----------------------------------
-  Pages                               Menyusun halaman, mengatur
-                                      route-level data, dan menghubungkan
-                                      komponen
-
-  Components                          Menampilkan UI dan menangani
-                                      interaksi komponen
-
-  Composables                         Reusable stateful logic dan
-                                      lifecycle-related logic
-
-  Services                            Komunikasi HTTP/API ke Laravel
-
-  Types                               Definisi tipe request, response,
-                                      dan domain frontend
-
-  Utils                               Fungsi helper murni dan reusable
-
-  Stores                              Shared/global state bila memang
-                                      diperlukan
-
-  Middleware                          Pemeriksaan navigasi, misalnya
-                                      status autentikasi
-  -----------------------------------------------------------------------
-
-Aturan: - Jangan menulis HTTP request langsung di komponen UI. - Jangan
-menempatkan seluruh logic halaman dalam satu file page. - Jangan
-mencampur formatting, business rules backend, dan markup UI. - Jangan
-membuat abstraksi atau folder yang belum dibutuhkan. - Business rules
-keuangan tetap menjadi tanggung jawab Laravel.
-
-## 9.3 Component standards
-
--   Setiap komponen memiliki satu tanggung jawab utama.
--   Gunakan reusable components untuk pola UI yang berulang.
--   Gunakan props untuk menerima data dan emits untuk mengirim event.
--   Definisikan props, emits, dan tipe data dengan TypeScript.
--   Hindari prop drilling yang berlebihan; pertimbangkan composable atau
-    store bila benar-benar diperlukan.
--   Pecah komponen kompleks menjadi komponen yang lebih kecil.
--   Hindari komponen generik dengan terlalu banyak props, kondisi, dan
-    mode.
--   Gunakan nama komponen yang deskriptif dan konsisten.
--   Batas 100--200 baris per komponen hanya pedoman untuk meninjau
-    kompleksitas, bukan batas absolut.
-
-## 9.4 TypeScript standards
-
--   Aktifkan strict mode.
--   Hindari `any`; gunakan tipe konkret, `unknown`, generic, atau
-    narrowing.
--   Definisikan tipe untuk API request dan response.
--   Definisikan tipe props, emits, dan return value jika membantu
-    kejelasan.
--   Hindari type assertion tanpa alasan yang kuat.
--   Jangan menduplikasi definisi tipe yang sama di banyak tempat.
--   Pastikan tipe frontend mengikuti kontrak API backend.
-
-## 9.5 API integration
-
--   Gunakan satu centralized API client.
--   Pisahkan API service berdasarkan domain/resource, misalnya category,
-    COA, transaction, report, dan auth.
--   Simpan base URL melalui runtime config/environment variable.
--   Jangan menyimpan secret backend di konfigurasi publik Nuxt.
--   Tangani loading, success, empty, dan error state.
--   Tangani status 401, 403, 404, 409, 422, 429, dan 5xx secara
-    konsisten.
--   Hindari duplicate request dan race condition pada pencarian/filter.
--   Gunakan cancellation atau mekanisme stale-response protection jika
-    request dapat saling mendahului.
--   Pertahankan kontrak response JSON yang disepakati dengan backend.
-
-## 9.6 State management
-
--   Gunakan `ref()` untuk local state.
--   Gunakan `computed()` untuk derived state.
--   Gunakan composables untuk reusable stateful logic.
--   Gunakan `useAsyncData` atau mekanisme Nuxt yang sesuai untuk data
-    fetching dan SSR.
--   Gunakan Pinia hanya ketika shared/global state memang membutuhkan
-    pengelolaan terpusat.
--   Jangan menyimpan semua response API dalam global store tanpa alasan.
--   Hindari duplikasi state yang sebenarnya dapat dihitung.
--   Pastikan state diperbarui atau di-invalidate setelah operasi CRUD.
--   Hindari watcher dan lifecycle hook yang memicu request berulang.
-
-## 9.7 Form handling dan validation
-
--   Gunakan reusable form controls jika pola input berulang.
--   Lakukan validasi frontend untuk UX, tetapi backend tetap menjadi
-    sumber validasi utama.
--   Tampilkan error validasi dari HTTP 422 pada field yang sesuai.
--   Tampilkan loading state ketika submit berlangsung.
--   Cegah double submission di UI, tanpa menganggapnya sebagai pengganti
-    proteksi backend.
--   Pertahankan input pengguna ketika request gagal.
--   Gunakan confirmation dialog untuk operasi destruktif.
--   Pastikan label, instruksi, dan pesan error terhubung dengan field
-    yang benar.
--   Jangan mengimplementasikan ulang business rules kompleks hanya di
-    frontend.
-
-## 9.8 Frontend security
-
--   Hindari `v-html` untuk data yang tidak tepercaya.
--   Jangan menaruh API secret, private key, atau credential di bundle
-    frontend.
--   Jangan menganggap middleware Nuxt sebagai pengganti authorization
-    backend.
--   Laravel wajib memeriksa izin pada setiap endpoint terlindungi.
--   Jangan menyimpan password atau secret token di localStorage.
--   Pilih strategi autentikasi yang aman dan konsisten. Jika menggunakan
-    Laravel Sanctum SPA cookie-based, konfigurasi domain, cookie, CORS,
-    dan CSRF harus benar.
--   Jangan menampilkan detail internal server atau data sensitif pada UI
-    maupun console.
--   Validasi dan encode data sesuai konteks penggunaan.
--   Gunakan HTTPS pada production.
-
-## 9.9 Performance optimization
-
--   Gunakan pagination server-side untuk tabel transaksi dan data besar.
--   Gunakan debounce pada input pencarian.
--   Hindari request berulang yang tidak diperlukan.
--   Gunakan lazy loading untuk komponen/fitur berat jika bermanfaat.
--   Optimalkan gambar dan aset statis.
--   Hindari computed/watch yang tidak diperlukan.
--   Gunakan dynamic import untuk bagian aplikasi yang layak dimuat
-    secara terpisah.
--   Pilih SSR, prerendering, atau client rendering berdasarkan kebutuhan
-    halaman; jangan menerapkan satu mode secara membabi buta.
--   Pastikan filter dan pagination tidak mengunduh seluruh dataset ke
-    browser.
-
-## 9.10 UI/UX, Design System, dan Accessibility
-
-Design system antarmuka bergaya clean modern corporate aesthetic:
-- **Palet Warna Utama**:
-  - **Primary Blue / Brand Blue**: `#0284c7` (Sky 600) / `#0369a1` (Sky 700) / `#1d4ed8` (Royal Blue) untuk branding, active states, focus rings, dan link interaktif.
-  - **Brand Orange / Accent Warm**: `#ea580c` (Orange 600) / `#c2410c` (Deep Orange 700) / `#f97316` (Amber/Orange accent) untuk call-to-action (CTA), highlight badges, dan tombol aksi utama.
-  - **Neutral & Background**: Clean white (`#ffffff`), soft slate background (`#f8fafc` / `#f1f5f9`), dan border abu-abu halus (`#e2e8f0` / `#cbd5e1`).
-  - **Sidebar / Header Mode**: Light mode clean white (`#ffffff`) dengan border slate halus (`#e2e8f0`), aksen biru langit (`#0284c7`) untuk navigasi aktif dan teks slate gelap (`#334155`).
-- **Card & Component Styling**:
-  - Sudut rounded halus (`rounded-xl` / `rounded-2xl`).
-  - Subtle shadows (`shadow-xs` / `shadow-sm`) dengan border tipis yang rapi (`border border-slate-200/80`).
-  - Input field dengan background soft gray/white, border halus, dan rounded pills/curved corners.
-  - Pagination bergaya modern pill/box berbingkai dengan nomor aktif berlatar belakang biru/oranye.
-  - **Tabel Laporan Profit & Loss (Soft Muted Theme)**: Hindari warna neon/terlalu mencolok pada tampilan layar web. Header tabel menggunakan soft neutral slate (`bg-slate-100/80`), baris kategori clean white dengan badge/dot indikator lembut, baris total menggunakan aksen pastel lembut (`bg-emerald-50/60` untuk Income dan `bg-orange-50/60` untuk Expense), serta baris Net Income menggunakan slate tegas berkontras bersih.
-- Terapkan design system untuk warna, typography, spacing, border, radius, dan komponen.
-- Gunakan layout navigasi yang konsisten.
-- Pastikan tampilan responsif pada desktop, tablet, dan mobile.
-- Sediakan loading, empty, error, dan success states.
-- Gunakan toast untuk feedback non-blocking dan dialog untuk konfirmasi penting.
-- Gunakan semantic HTML.
-- Sediakan label input, keyboard navigation, focus state, dan kontras warna yang memadai.
-- Format nominal menggunakan IDR dan tanggal secara konsisten.
-- Gunakan tabel yang mudah dibaca, filter periode, pencarian, dan pagination yang jelas.
-
-## 9.11 Financial data presentation
-
--   Gunakan `Intl.NumberFormat` untuk menampilkan mata uang IDR.
--   Ikuti representasi nominal yang disepakati dengan backend.
--   Hindari perhitungan nominal menggunakan floating-point yang dapat
-    menghasilkan pembulatan tidak akurat.
--   Perhitungan Profit & Loss dilakukan backend; frontend menampilkan
-    hasil API.
--   Tampilkan debit sebagai pengeluaran dan credit sebagai pemasukan
-    sesuai konvensi spreadsheet proyek.
--   Tampilkan nilai nol dan bulan tanpa transaksi secara konsisten.
--   Pastikan filter periode yang dipilih tercermin pada tabel,
-    ringkasan, dan hasil export.
-
-## 9.12 Frontend testing dan code quality
-
-Tools yang direkomendasikan: - ESLint untuk linting. - Prettier untuk
-formatting. - TypeScript compiler/type checking. - Vitest untuk unit
-testing. - Vue Test Utils untuk component testing. - Playwright untuk
-end-to-end testing.
-
-Aturan: - Unit test untuk utility dan composable yang memiliki logic. -
-Component test untuk komponen dengan interaksi atau kondisi kompleks. -
-Uji validasi form, event emits, loading, error, empty, dan success
-state. - E2E test untuk alur utama: autentikasi, CRUD category, CRUD
-COA, CRUD transaction, laporan, dan export. - Uji akses route
-berdasarkan status autentikasi. - Gunakan mock API pada unit/component
-test; jangan bergantung pada layanan production. - Jalankan lint, type
-check, dan test sebelum perubahan dinyatakan selesai.
-
-## 9.13 Struktur folder frontend
-
-Struktur target yang disarankan:
-
-``` text
-frontend/
-├── app/
-│   ├── assets/
-│   │   └── css/
-│   ├── components/
-│   │   ├── ui/
-│   │   ├── layout/
-│   │   ├── categories/
-│   │   ├── coa/
-│   │   ├── transactions/
-│   │   └── reports/
-│   ├── composables/
-│   ├── layouts/
-│   ├── middleware/
-│   ├── pages/
-│   │   ├── login.vue
-│   │   ├── categories/
-│   │   ├── coa/
-│   │   ├── transactions/
-│   │   └── reports/
-│   ├── services/
-│   ├── stores/
-│   ├── types/
-│   └── utils/
-├── public/
-├── nuxt.config.ts
-├── tsconfig.json
-└── package.json
-```
-
-Catatan: - Struktur tersebut adalah panduan, bukan kewajiban membuat
-semua folder sejak awal. - Tambahkan file/folder ketika fitur
-membutuhkannya. - Ikuti konvensi direktori Nuxt yang sesuai dengan versi
-Nuxt yang digunakan. - Hindari membuat `stores` jika belum ada kebutuhan
-global state.
-
-------------------------------------------------------------------------
-
-# 10. API Contract dan Integrasi Frontend-Backend
-
--   Backend dan frontend harus menyepakati endpoint, HTTP method,
-    request schema, response schema, status code, pagination, dan error
-    format.
--   Gunakan prefix versi API, misalnya `/api/v1`.
--   Dokumentasikan endpoint dan contoh payload.
--   Frontend tidak boleh mengasumsikan field yang tidak dijamin kontrak
-    API.
--   Perubahan response yang breaking harus dikoordinasikan dan diberi
-    versi bila diperlukan.
--   Tanggal, timezone, decimal, dan nominal harus memiliki format yang
-    disepakati.
-
-Contoh response pagination:
-
-``` json
+// Sukses (Pagination)
 {
   "success": true,
   "status": 200,
@@ -669,88 +327,86 @@ Contoh response pagination:
   "meta": {
     "current_page": 1,
     "per_page": 15,
-    "total": 0,
-    "last_page": 1
+    "total": 45,
+    "last_page": 3
   },
   "errors": null
 }
+
+// Gagal Validasi (422)
+{
+  "success": false,
+  "status": 422,
+  "message": "The given data was invalid.",
+  "data": null,
+  "meta": null,
+  "errors": {
+    "nominal": ["Debit dan credit tidak boleh diisi bersamaan dalam satu baris transaksi."]
+  }
+}
 ```
 
-# 11. Environment dan Development Workflow
+---
 
--   Backend dan frontend berada di direktori terpisah.
--   Backend lokal: `http://127.0.0.1:8000`.
--   Frontend lokal: `http://localhost:3000`.
--   API base URL frontend dikonfigurasi melalui Nuxt runtime config.
--   File `.env` tidak boleh masuk version control.
--   Sediakan `.env.example` tanpa secret.
--   Gunakan Git dengan commit message yang deskriptif.
--   Perubahan database harus melalui migration.
--   Perubahan API harus memperbarui dokumentasi/kontrak.
--   Jalankan test dan lint sebelum merge atau menyelesaikan fitur.
+# 9. Frontend Engineering Standards (Nuxt.js + Vue 3)
 
-# 12. Acceptance Criteria
+## 9.1 Arsitektur Frontend
+- **Framework:** Nuxt 3 / Nuxt 4 dengan Vue 3 Composition API (`<script setup lang="ts">`).
+- **Bahasa & Typing:** TypeScript dalam mode *strict*. Seluruh tipe domain, payload request, dan response didefinisikan terpusat di `app/types/index.ts`.
+- **Styling:** Tailwind CSS dengan design system modern korporat.
+- **Client API Terpusat:** Composable `useApi()` membungkus `$fetch` dengan penanganan header otomatis dan standardisasi error handling.
 
-Sistem dinyatakan memenuhi standar awal apabila:
+## 9.2 UI/UX Design System
+- **Palet Warna:**
+  - **Primary Blue:** `#0284c7` (Sky 600) untuk navigasi aktif, brand highlight, dan link.
+  - **Warm Accent:** `#ea580c` (Orange 600) untuk tombol aksi utama (*CTA*) dan badge penegas.
+  - **Neutral Background:** Clean White (`#ffffff`), soft slate canvas (`bg-slate-50/70`), serta border slate tipis (`border-slate-200`).
+- **Sidebar Navigation:** Menggunakan **Light Mode Clean Style** (`bg-white` dengan border kanan `border-slate-200`, ikon sky-600 pada menu aktif).
+- **Tabel Laporan Profit & Loss (*Soft Muted Theme*):**
+  - Header tabel menggunakan warna *slate* netral lembut (`bg-slate-100/80` dan `bg-slate-50`).
+  - Baris kategori menggunakan latar putih bersih dengan dot indikator warna lembut (hijau pastel untuk Income, oranye pastel untuk Expense).
+  - Baris total menggunakan aksen pastel lembut (`bg-emerald-50/60` untuk Total Income, `bg-orange-50/60` untuk Total Expense).
+  - Baris Net Income menggunakan latar slate tegas (`bg-slate-50/90`) dengan tipografi tebal bernuansa biru (surplus) atau merah (defisit).
+- **Dialog Konfirmasi Hapus Transaksi:** Menampilkan modal konfirmasi sebelum aksi *Soft Delete* dijalankan untuk melindungi integritas data pengguna.
+- **Standarisasi Komponen UI Filter (`app/components/`):**
+  - `FilterCard.vue`: Kontainer filter terstandarisasi dengan latar putih, sudut melengkung `rounded-2xl`, border halus, dan bayangan lembut.
+  - `FilterSearch.vue`: Input pencarian dengan ikon kaca pembesar, tombol bersihkan (*clear*), dan status fokus yang konsisten.
+  - `FilterSelect.vue`: Dropdown filter dengan ikon panah kustom dan tipografi terstandar.
+  - `FilterDateRange.vue`: Pemilih rentang tanggal (tanggal awal s.d. tanggal akhir) dengan ikon kalender terintegrasi.
+  - `FilterPeriod.vue`: Pemilih periode bulanan (bulan awal & tahun s.d. bulan akhir & tahun) dilengkapi tombol aksi "Tampilkan" terintegrasi untuk Laporan Profit & Loss.
 
-1.  Pengguna dapat mengelola Category, COA, dan Transaction sesuai
-    aturan bisnis.
-2.  Pemasukan dan pengeluaran tersimpan sesuai konvensi credit/debit
-    proyek.
-3.  Laporan Profit & Loss menampilkan nilai per kategori dan periode
-    secara akurat.
-4.  Export Excel konsisten dengan filter dan laporan di layar.
-5.  Backend menggunakan Form Request, Service, dan API response
-    terstandar.
-6.  Endpoint terlindungi autentikasi dan authorization sesuai hak akses.
-7.  Query list menggunakan pagination dan relasi yang diperlukan
-    menggunakan eager loading.
-8.  Operasi multi-query yang membutuhkan atomicity menggunakan database
-    transaction.
-9.  Constraint database dan concurrency control melindungi data dari
-    duplikasi atau konflik yang relevan.
-10. Frontend memisahkan pages, components, composables, services, types,
-    dan utils sesuai tanggung jawabnya.
-11. Frontend menangani loading, empty, success, dan error state.
-12. UI responsif dan memiliki pola interaksi yang konsisten.
-13. Unit, feature, component, dan E2E tests tersedia sesuai ruang
-    lingkup dan risiko.
-14. Linting dan type checking berjalan tanpa error yang belum
-    diselesaikan.
-15. Tidak ada secret atau data sensitif yang terekspos melalui frontend
-    maupun repository.
+---
 
-# 13. Implementation Order
+# 10. Acceptance Criteria
 
-1.  Finalisasi aturan bisnis dan skema database.
-2.  Buat migration, model, relationship, factory, dan seeder.
-3.  Implementasikan API response standard.
-4.  Implementasikan backend services, Form Requests, controllers, dan
-    routes.
-5.  Implementasikan authentication dan authorization.
-6.  Implementasikan CRUD Category.
-7.  Implementasikan CRUD COA.
-8.  Implementasikan CRUD Transaction.
-9.  Implementasikan Profit & Loss dan Excel export.
-10. Buat centralized API client dan TypeScript API contracts di Nuxt.
-11. Buat layout, design system, dan reusable UI components.
-12. Implementasikan halaman CRUD frontend.
-13. Implementasikan laporan dan export frontend.
-14. Tambahkan unit, feature, component, dan E2E tests.
-15. Lakukan security review, performance review, dan acceptance testing.
+Sistem dinyatakan memenuhi seluruh standar arsitektur apabila:
 
-------------------------------------------------------------------------
+1. **Fleksibilitas Transaksi:** Pada form transaksi, pengguna **wajib memilih Tipe Transaksi (Debit atau Credit)** secara eksplisit lalu mengisi nominal. Nilai tersimpan pada kolom yang dipilih (kolom lainnya `0`), tanpa diblokir oleh kategori/akun, asalkan mematuhi validasi eksklusif (salah satu > 0, tidak keduanya terisi, tidak bernilai negatif).
+2. **Koreksi Transaksi:** Kolom `description` dapat diisi dengan penjelas alasan koreksi saldo (seperti retur, potongan, diskon).
+3. **Pemberlakuan Restrict Delete:**
+   - Kategori yang masih menaungi akun COA ditolak saat akan dihapus (HTTP 409).
+   - Akun COA yang telah memiliki riwayat transaksi ditolak saat akan dihapus fisik (HTTP 409).
+4. **Deaktivasi COA:** Akun COA yang telah memiliki transaksi dapat dinonaktifkan (`is_active = false`), sehingga tidak muncul lagi di form transaksi baru namun laporan masa lalu tetap utuh.
+5. **Pemberlakuan Soft Delete Transaksi:**
+   - Transaksi yang dihapus tetap tersimpan di database dengan kolom `deleted_at` terisi timestamp.
+   - Halaman daftar transaksi dan laporan Profit & Loss secara otomatis mengabaikan transaksi yang berstatus soft-deleted.
+6. **Akurasi Perhitungan Laporan:**
+   - Kategori Pemasukan dihitung dari: $\sum (\text{credit} - \text{debit})$.
+   - Kategori Pengeluaran dihitung dari: $\sum (\text{debit} - \text{credit})$.
+   - Net Income terhitung tepat dari $\text{Total Income} - \text{Total Expense}$.
+7. **Kesesuaian Ekspor Excel:** Format spreadsheet `.xlsx` hasil unduhan menampilkan data dan layout yang identik dengan tampilan laporan di layar.
+8. **Pengujian Terotomatisasi:** Seluruh unit test dan feature test backend (PHPUnit) berjalan sukses tanpa error.
 
-## 14. Prinsip Pengembangan
+---
 
--   Prioritaskan solusi sederhana yang memenuhi kebutuhan.
--   Jangan menambahkan library, layer, atau abstraksi tanpa alasan
-    teknis.
--   Jangan mengorbankan keamanan dan integritas data demi kecepatan
-    implementasi.
--   Business rules dan perhitungan keuangan harus konsisten dan
-    bersumber dari backend.
--   Setiap fitur harus memiliki skenario sukses, gagal, dan batasan yang
-    jelas.
--   Dokumentasikan keputusan teknis yang berdampak pada kontrak API,
-    database, keamanan, dan proses bisnis.
+# 11. Urutan Implementasi
+
+1. **Database & Migrations:** Update migrasi tabel `categories`, `chart_of_accounts`, dan `transactions` (tambahkan `softDeletes`, default decimal, dan foreign key restrict).
+2. **Model & Trait:** Pasang trait `SoftDeletes` pada model `Transaction`, sesuaikan relasi pada `Category` dan `ChartOfAccount`.
+3. **Form Request Validation:** Sesuaikan aturan validasi eksklusif debit/credit pada `StoreTransactionRequest` dan `UpdateTransactionRequest`.
+4. **Service Layer:**
+   - Perbarui `CategoryService` dan `ChartOfAccountService` dengan proteksi *restrict delete*.
+   - Perbarui `TransactionService` untuk mendukung soft delete.
+   - Perbarui `ProfitAndLossService` dengan formula $\sum(\text{credit} - \text{debit})$ dan $\sum(\text{debit} - \text{credit})$.
+5. **Testing Backend:** Jalankan test suite PHPUnit untuk memverifikasi seluruh skenario sukses, validasi negatif, restrict delete, dan kalkulasi Profit & Loss.
+6. **Frontend Updates:** Pastikan modal konfirmasi hapus transaksi terpasang di UI dan form input transaksi mendukung fleksibilitas pencatatan.

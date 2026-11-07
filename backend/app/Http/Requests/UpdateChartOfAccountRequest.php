@@ -30,7 +30,6 @@ class UpdateChartOfAccountRequest extends FormRequest
             ],
             'name' => ['required', 'string', 'max:150'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
-            'is_active' => ['nullable', 'boolean'],
         ];
     }
 

@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\V1;
 use App\Exports\ProfitAndLossExport;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DashboardSummaryRequest;
 use App\Http\Requests\ProfitLossReportRequest;
+use App\Services\DashboardSummaryService;
 use App\Services\ProfitAndLossService;
 use Illuminate\Http\JsonResponse;
 use Maatwebsite\Excel\Facades\Excel;
@@ -14,8 +16,19 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class ReportController extends Controller
 {
     public function __construct(
-        private readonly ProfitAndLossService $profitAndLossService
+        private readonly ProfitAndLossService $profitAndLossService,
+        private readonly DashboardSummaryService $dashboardSummaryService
     ) {}
+
+    public function dashboardSummary(DashboardSummaryRequest $request): JsonResponse
+    {
+        $summary = $this->dashboardSummaryService->summarize($request->validated('month'));
+
+        return ApiResponse::success(
+            $summary,
+            'Dashboard summary generated successfully.'
+        );
+    }
 
     public function profitAndLoss(ProfitLossReportRequest $request): JsonResponse
     {

@@ -19,7 +19,6 @@ class ChartOfAccountFactory extends Factory
             'code' => (string) fake()->unique()->numberBetween(100, 9999),
             'name' => fake()->words(3, true),
             'category_id' => Category::factory(),
-            'is_active' => true,
         ];
     }
 }

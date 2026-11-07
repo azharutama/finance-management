@@ -21,9 +21,7 @@ class ProfitAndLossService
         $months = $this->buildMonthsList($startDate, $endDate);
 
         $categories = Category::query()
-            ->select(['id', 'name', 'type'])
-            ->orderByRaw("CASE WHEN type = 'income' THEN 0 ELSE 1 END")
-            ->orderBy('id')
+            ->select(['id', 'name'])
             ->get();
 
         $driver = DB::getDriverName();
@@ -36,6 +34,7 @@ class ProfitAndLossService
         $aggregatedRows = DB::table('transactions')
             ->join('chart_of_accounts', 'transactions.coa_id', '=', 'chart_of_accounts.id')
             ->join('categories', 'chart_of_accounts.category_id', '=', 'categories.id')
+            ->whereNull('transactions.deleted_at')
             ->whereBetween('transactions.date', [$startDate->toDateString(), $endDate->toDateString()])
             ->selectRaw("
                 categories.id as category_id,
@@ -56,6 +55,50 @@ class ProfitAndLossService
             ];
         }
 
+        // Ambil riwayat akumulasi kredit dan debit per kategori dari transaksi (mengabaikan soft deletes)
+        $allTimeStats = DB::table('transactions')
+            ->join('chart_of_accounts', 'transactions.coa_id', '=', 'chart_of_accounts.id')
+            ->whereNull('transactions.deleted_at')
+            ->selectRaw("
+                chart_of_accounts.category_id,
+                COALESCE(SUM(transactions.credit), 0) as all_credit,
+                COALESCE(SUM(transactions.debit), 0) as all_debit
+            ")
+            ->groupBy('chart_of_accounts.category_id')
+            ->get()
+            ->keyBy('category_id');
+
+        // Fungsi penentu: kategori bertipe kredit (Income) vs bertipe debit (Expense) berdasarkan data transaksi
+        $isCreditCategory = function (Category $cat) use ($allTimeStats, $lookup): bool {
+            // Prioritaskan mutasi pada periode yang sedang difilter
+            $periodCredit = 0.0;
+            $periodDebit = 0.0;
+            if (isset($lookup[$cat->id])) {
+                foreach ($lookup[$cat->id] as $cell) {
+                    $periodCredit += $cell['credit'];
+                    $periodDebit += $cell['debit'];
+                }
+            }
+            if ($periodCredit > 0 || $periodDebit > 0) {
+                return $periodCredit >= $periodDebit;
+            }
+
+            // Jika periode aktif kosong, rujuk riwayat transaksi all-time
+            if ($stats = $allTimeStats->get($cat->id)) {
+                if ((float) $stats->all_credit > 0 || (float) $stats->all_debit > 0) {
+                    return (float) $stats->all_credit >= (float) $stats->all_debit;
+                }
+            }
+
+            // Kategori tanpa transaksi sama sekali ditempatkan di kelompok debit (nilai 0)
+            return false;
+        };
+
+        // Urutkan kategori kredit di atas, disusul kategori debit
+        $categories = $categories->sortBy(function ($cat) use ($isCreditCategory) {
+            return $isCreditCategory($cat) ? 0 : 1;
+        })->values();
+
         $incomeCategories = [];
         $expenseCategories = [];
 
@@ -69,13 +112,15 @@ class ProfitAndLossService
         }
 
         foreach ($categories as $category) {
-            $isIncome = $category->type === Category::TYPE_INCOME;
+            $isIncome = $isCreditCategory($category);
             $monthlyValues = [];
             $categoryTotal = 0.0;
 
             foreach ($months as $month) {
                 $cell = $lookup[$category->id][$month] ?? ['debit' => 0.0, 'credit' => 0.0];
-                $amount = $isIncome ? $cell['credit'] : $cell['debit'];
+                $amount = $isIncome
+                    ? ($cell['credit'] - $cell['debit'])
+                    : ($cell['debit'] - $cell['credit']);
                 $amount = round((float) $amount, 2);
 
                 $monthlyValues[$month] = $amount;
@@ -97,7 +142,7 @@ class ProfitAndLossService
             $item = [
                 'category_id' => $category->id,
                 'category_name' => $category->name,
-                'type' => $category->type,
+                'type' => $isIncome ? 'income' : 'expense',
                 'monthly' => $monthlyValues,
                 'total' => $categoryTotal,
             ];

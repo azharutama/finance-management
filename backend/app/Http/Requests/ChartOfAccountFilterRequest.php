@@ -20,7 +20,6 @@ class ChartOfAccountFilterRequest extends FormRequest
         return [
             'search' => ['nullable', 'string', 'max:100'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
-            'is_active' => ['nullable', 'boolean'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
             'all' => ['nullable', 'boolean'],
@@ -29,11 +28,6 @@ class ChartOfAccountFilterRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($this->has('is_active') && $this->input('is_active') !== null && $this->input('is_active') !== '') {
-            $this->merge([
-                'is_active' => filter_var($this->input('is_active'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
-            ]);
-        }
         if ($this->has('all') && $this->input('all') !== null && $this->input('all') !== '') {
             $this->merge([
                 'all' => filter_var($this->input('all'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),

@@ -58,7 +58,6 @@ class TransactionSeeder extends Seeder
                 'description' => $tx['description'],
                 'debit' => $tx['debit'],
                 'credit' => $tx['credit'],
-                'created_by' => $admin?->id,
             ]);
         }
     }

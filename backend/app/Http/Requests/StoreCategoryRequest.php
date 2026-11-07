@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +19,6 @@ class StoreCategoryRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100', Rule::unique('categories', 'name')],
-            'type' => ['nullable', 'string', Rule::in([Category::TYPE_INCOME, Category::TYPE_EXPENSE])],
         ];
     }
 

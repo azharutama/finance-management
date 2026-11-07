@@ -34,7 +34,6 @@ class ChartOfAccountSeeder extends Seeder
                 [
                     'name' => $coa['name'],
                     'category_id' => $categoryId,
-                    'is_active' => true,
                 ]
             );
         }

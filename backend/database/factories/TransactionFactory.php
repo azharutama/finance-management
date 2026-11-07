@@ -21,7 +21,6 @@ class TransactionFactory extends Factory
             'description' => fake()->sentence(4),
             'debit' => 100000,
             'credit' => 0,
-            'created_by' => null,
         ];
     }
 

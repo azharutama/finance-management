@@ -16,10 +16,10 @@ class TransactionService
     public function list(array $filters = []): LengthAwarePaginator
     {
         $query = Transaction::query()
-            ->select(['id', 'date', 'coa_id', 'description', 'debit', 'credit', 'created_by', 'created_at', 'updated_at'])
+            ->select(['id', 'date', 'coa_id', 'description', 'debit', 'credit', 'created_at', 'updated_at'])
             ->with([
-                'coa:id,code,name,category_id,is_active',
-                'coa.category:id,name,type',
+                'coa:id,code,name,category_id',
+                'coa.category:id,name',
             ]);
 
         if (! empty($filters['start_date'])) {
@@ -68,24 +68,17 @@ class TransactionService
             /** @var ChartOfAccount|null $coa */
             $coa = ChartOfAccount::with('category')->whereKey($data['coa_id'])->lockForUpdate()->first();
 
-            if (! $coa || ! $coa->is_active) {
-                throw ValidationException::withMessages([
-                    'coa_id' => ['The selected Chart of Account is inactive and cannot be used for transactions.'],
-                ]);
-            }
-
             $transaction = Transaction::create([
                 'date' => $data['date'],
                 'coa_id' => $coa->id,
                 'description' => $data['description'],
                 'debit' => round((float) ($data['debit'] ?? 0), 2),
                 'credit' => round((float) ($data['credit'] ?? 0), 2),
-                'created_by' => $userId,
             ]);
 
             return $transaction->load([
-                'coa:id,code,name,category_id,is_active',
-                'coa.category:id,name,type',
+                'coa:id,code,name,category_id',
+                'coa.category:id,name',
             ]);
         });
     }
@@ -111,8 +104,8 @@ class TransactionService
             ]);
 
             return $locked->load([
-                'coa:id,code,name,category_id,is_active',
-                'coa.category:id,name,type',
+                'coa:id,code,name,category_id',
+                'coa.category:id,name',
             ]);
         });
     }

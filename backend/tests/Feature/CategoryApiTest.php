@@ -16,20 +16,18 @@ class CategoryApiTest extends TestCase
         // Create
         $createResponse = $this->postJson('/api/v1/categories', [
             'name' => 'Salary',
-            'type' => 'income',
         ]);
 
         $createResponse->assertStatus(201)
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.name', 'Salary')
-            ->assertJsonPath('data.type', 'income');
+            ->assertJsonMissingPath('data.type');
 
         $categoryId = $createResponse->json('data.id');
 
         // Duplicate name fails with 422
         $this->postJson('/api/v1/categories', [
             'name' => 'Salary',
-            'type' => 'income',
         ])->assertStatus(422)
             ->assertJsonPath('success', false);
 
@@ -42,7 +40,6 @@ class CategoryApiTest extends TestCase
         // Update
         $this->putJson("/api/v1/categories/{$categoryId}", [
             'name' => 'Monthly Salary',
-            'type' => 'income',
         ])->assertStatus(200)
             ->assertJsonPath('data.name', 'Monthly Salary');
 
