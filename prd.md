@@ -555,23 +555,29 @@ keuangan tetap menjadi tanggung jawab Laravel.
 -   Pastikan filter dan pagination tidak mengunduh seluruh dataset ke
     browser.
 
-## 9.10 UI/UX dan accessibility
+## 9.10 UI/UX, Design System, dan Accessibility
 
--   Terapkan design system untuk warna, typography, spacing, border,
-    radius, dan komponen.
--   Gunakan layout navigasi yang konsisten.
--   Pastikan tampilan responsif pada desktop, tablet, dan mobile.
--   Sediakan loading, empty, error, dan success states.
--   Gunakan toast untuk feedback non-blocking dan dialog untuk
-    konfirmasi penting.
--   Gunakan semantic HTML.
--   Sediakan label input, keyboard navigation, focus state, dan kontras
-    warna yang memadai.
--   Jangan menggunakan warna sebagai satu-satunya pembeda status.
--   Format nominal menggunakan IDR dan tanggal secara konsisten.
--   Gunakan tabel yang mudah dibaca, filter periode, pencarian, dan
-    pagination yang jelas.
--   Hindari animasi berlebihan yang mengganggu pekerjaan administratif.
+Design system antarmuka bergaya clean modern corporate aesthetic:
+- **Palet Warna Utama**:
+  - **Primary Blue / Brand Blue**: `#0284c7` (Sky 600) / `#0369a1` (Sky 700) / `#1d4ed8` (Royal Blue) untuk branding, active states, focus rings, dan link interaktif.
+  - **Brand Orange / Accent Warm**: `#ea580c` (Orange 600) / `#c2410c` (Deep Orange 700) / `#f97316` (Amber/Orange accent) untuk call-to-action (CTA), highlight badges, dan tombol aksi utama.
+  - **Neutral & Background**: Clean white (`#ffffff`), soft slate background (`#f8fafc` / `#f1f5f9`), dan border abu-abu halus (`#e2e8f0` / `#cbd5e1`).
+  - **Sidebar / Header Mode**: Light mode clean white (`#ffffff`) dengan border slate halus (`#e2e8f0`), aksen biru langit (`#0284c7`) untuk navigasi aktif dan teks slate gelap (`#334155`).
+- **Card & Component Styling**:
+  - Sudut rounded halus (`rounded-xl` / `rounded-2xl`).
+  - Subtle shadows (`shadow-xs` / `shadow-sm`) dengan border tipis yang rapi (`border border-slate-200/80`).
+  - Input field dengan background soft gray/white, border halus, dan rounded pills/curved corners.
+  - Pagination bergaya modern pill/box berbingkai dengan nomor aktif berlatar belakang biru/oranye.
+  - **Tabel Laporan Profit & Loss (Soft Muted Theme)**: Hindari warna neon/terlalu mencolok pada tampilan layar web. Header tabel menggunakan soft neutral slate (`bg-slate-100/80`), baris kategori clean white dengan badge/dot indikator lembut, baris total menggunakan aksen pastel lembut (`bg-emerald-50/60` untuk Income dan `bg-orange-50/60` untuk Expense), serta baris Net Income menggunakan slate tegas berkontras bersih.
+- Terapkan design system untuk warna, typography, spacing, border, radius, dan komponen.
+- Gunakan layout navigasi yang konsisten.
+- Pastikan tampilan responsif pada desktop, tablet, dan mobile.
+- Sediakan loading, empty, error, dan success states.
+- Gunakan toast untuk feedback non-blocking dan dialog untuk konfirmasi penting.
+- Gunakan semantic HTML.
+- Sediakan label input, keyboard navigation, focus state, dan kontras warna yang memadai.
+- Format nominal menggunakan IDR dan tanggal secara konsisten.
+- Gunakan tabel yang mudah dibaca, filter periode, pencarian, dan pagination yang jelas.
 
 ## 9.11 Financial data presentation
 
