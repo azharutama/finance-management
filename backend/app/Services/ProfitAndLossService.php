@@ -21,7 +21,7 @@ class ProfitAndLossService
         $months = $this->buildMonthsList($startDate, $endDate);
 
         $categories = Category::query()
-            ->select(['id', 'name', 'type', 'is_active'])
+            ->select(['id', 'name', 'type'])
             ->orderByRaw("CASE WHEN type = 'income' THEN 0 ELSE 1 END")
             ->orderBy('id')
             ->get();

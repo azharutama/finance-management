@@ -29,7 +29,6 @@ class UpdateCategoryRequest extends FormRequest
                 Rule::unique('categories', 'name')->ignore($category->id),
             ],
             'type' => ['nullable', 'string', Rule::in([Category::TYPE_INCOME, Category::TYPE_EXPENSE])],
-            'is_active' => ['nullable', 'boolean'],
         ];
     }
 

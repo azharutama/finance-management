@@ -15,7 +15,7 @@ class CategoryService
     public function list(array $filters = []): LengthAwarePaginator|Collection
     {
         $query = Category::query()
-            ->select(['id', 'name', 'type', 'is_active', 'created_at', 'updated_at'])
+            ->select(['id', 'name', 'type', 'created_at', 'updated_at'])
             ->withCount('chartOfAccounts');
 
         if (! empty($filters['search'])) {
@@ -25,10 +25,6 @@ class CategoryService
 
         if (! empty($filters['type'])) {
             $query->where('type', $filters['type']);
-        }
-
-        if (isset($filters['is_active']) && $filters['is_active'] !== null) {
-            $query->where('is_active', (bool) $filters['is_active']);
         }
 
         $query->orderByRaw("CASE WHEN type = 'income' THEN 0 ELSE 1 END")
@@ -54,7 +50,6 @@ class CategoryService
             $category = Category::create([
                 'name' => $data['name'],
                 'type' => $type,
-                'is_active' => $data['is_active'] ?? true,
             ]);
 
             return $category->loadCount('chartOfAccounts');
@@ -78,9 +73,6 @@ class CategoryService
             $locked->update([
                 'name' => $data['name'],
                 'type' => $newType,
-                'is_active' => array_key_exists('is_active', $data) && $data['is_active'] !== null
-                    ? (bool) $data['is_active']
-                    : $locked->is_active,
             ]);
 
             return $locked->loadCount('chartOfAccounts');
@@ -97,20 +89,21 @@ class CategoryService
             $locked = Category::whereKey($category->id)->lockForUpdate()->firstOrFail();
 
             if ($locked->chartOfAccounts()->exists()) {
-                abort(409, 'Cannot delete category because it is already associated with Chart of Accounts.');
+                abort(409, 'Cannot delete category that is assigned to one or more Chart of Accounts.');
             }
 
             $locked->delete();
         });
     }
 
+    /**
+     * Infer category classification (income/expense) by category name.
+     */
     private function inferTypeFromName(string $name): string
     {
         $lower = strtolower($name);
-        foreach (['income', 'salary', 'revenue', 'pendapatan', 'pemasukan', 'gaji'] as $keyword) {
-            if (str_contains($lower, $keyword)) {
-                return Category::TYPE_INCOME;
-            }
+        if (str_contains($lower, 'income') || str_contains($lower, 'gaji') || str_contains($lower, 'salary') || str_contains($lower, 'pendapatan') || str_contains($lower, 'profit')) {
+            return Category::TYPE_INCOME;
         }
 
         return Category::TYPE_EXPENSE;

@@ -20,7 +20,7 @@ class CategorySeeder extends Seeder
         foreach ($categoriesData as $cat) {
             Category::updateOrCreate(
                 ['name' => $cat['name']],
-                ['type' => $cat['type'], 'is_active' => true]
+                ['type' => $cat['type']]
             );
         }
     }

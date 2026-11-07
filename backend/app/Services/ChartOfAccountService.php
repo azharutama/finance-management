@@ -17,7 +17,7 @@ class ChartOfAccountService
     {
         $query = ChartOfAccount::query()
             ->select(['id', 'code', 'name', 'category_id', 'is_active', 'created_at', 'updated_at'])
-            ->with(['category:id,name,type,is_active'])
+            ->with(['category:id,name,type'])
             ->withCount('transactions');
 
         if (! empty($filters['search'])) {
@@ -60,7 +60,7 @@ class ChartOfAccountService
                 'is_active' => $data['is_active'] ?? true,
             ]);
 
-            return $coa->load('category:id,name,type,is_active')->loadCount('transactions');
+            return $coa->load('category:id,name,type')->loadCount('transactions');
         });
     }
 
@@ -90,7 +90,7 @@ class ChartOfAccountService
                     : $locked->is_active,
             ]);
 
-            return $locked->load('category:id,name,type,is_active')->loadCount('transactions');
+            return $locked->load('category:id,name,type')->loadCount('transactions');
         });
     }
 

@@ -19,7 +19,7 @@ class TransactionService
             ->select(['id', 'date', 'coa_id', 'description', 'debit', 'credit', 'created_by', 'created_at', 'updated_at'])
             ->with([
                 'coa:id,code,name,category_id,is_active',
-                'coa.category:id,name,type,is_active',
+                'coa.category:id,name,type',
             ]);
 
         if (! empty($filters['start_date'])) {
@@ -85,7 +85,7 @@ class TransactionService
 
             return $transaction->load([
                 'coa:id,code,name,category_id,is_active',
-                'coa.category:id,name,type,is_active',
+                'coa.category:id,name,type',
             ]);
         });
     }
@@ -112,7 +112,7 @@ class TransactionService
 
             return $locked->load([
                 'coa:id,code,name,category_id,is_active',
-                'coa.category:id,name,type,is_active',
+                'coa.category:id,name,type',
             ]);
         });
     }
