@@ -9,12 +9,17 @@ use Illuminate\Validation\Validator;
 
 class ProfitLossReportRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi request laporan Profit & Loss.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi format filter periode laporan (bulan atau tanggal).
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -27,6 +32,9 @@ class ProfitLossReportRequest extends FormRequest
         ];
     }
 
+    /**
+     * Validasi lanjutan: memastikan rentang periode maksimal 36 bulan.
+     */
     public function after(): array
     {
         return [

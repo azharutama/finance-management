@@ -89,18 +89,20 @@ class TransactionService
     public function update(Transaction $transaction, array $data): Transaction
     {
         return DB::transaction(function () use ($transaction, $data) {
+            $coaId = (int) ($data['coa_id'] ?? $transaction->coa_id);
+
             /** @var ChartOfAccount $coa */
-            $coa = ChartOfAccount::with('category')->whereKey($data['coa_id'])->lockForUpdate()->firstOrFail();
+            $coa = ChartOfAccount::with('category')->whereKey($coaId)->lockForUpdate()->firstOrFail();
 
             /** @var Transaction $locked */
             $locked = Transaction::whereKey($transaction->id)->lockForUpdate()->firstOrFail();
 
             $locked->update([
-                'date' => $data['date'],
+                'date' => $data['date'] ?? $locked->date,
                 'coa_id' => $coa->id,
-                'description' => $data['description'],
-                'debit' => round((float) ($data['debit'] ?? 0), 2),
-                'credit' => round((float) ($data['credit'] ?? 0), 2),
+                'description' => $data['description'] ?? $locked->description,
+                'debit' => isset($data['debit']) ? round((float) $data['debit'], 2) : $locked->debit,
+                'credit' => isset($data['credit']) ? round((float) $data['credit'], 2) : $locked->credit,
             ]);
 
             return $locked->load([

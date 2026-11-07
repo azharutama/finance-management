@@ -11,6 +11,9 @@ class CategoryApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Memastikan siklus CRUD kategori (create, list paginasi/all, show, update, delete) berjalan benar.
+     */
     public function test_can_list_create_update_and_delete_category(): void
     {
         // Create
@@ -37,6 +40,18 @@ class CategoryApiTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonStructure(['data', 'meta' => ['current_page', 'per_page', 'total', 'last_page']]);
 
+        // List all without pagination
+        $allRes = $this->getJson('/api/v1/categories?all=true');
+        $allRes->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('meta', null);
+
+        // Show single category
+        $this->getJson("/api/v1/categories/{$categoryId}")
+            ->assertStatus(200)
+            ->assertJsonPath('data.id', $categoryId)
+            ->assertJsonPath('data.name', 'Salary');
+
         // Update
         $this->putJson("/api/v1/categories/{$categoryId}", [
             'name' => 'Monthly Salary',
@@ -51,6 +66,9 @@ class CategoryApiTest extends TestCase
         $this->assertDatabaseMissing('categories', ['id' => $categoryId]);
     }
 
+    /**
+     * Memastikan kategori dilarang dihapus (409 Conflict) jika masih menaungi anak akun COA.
+     */
     public function test_cannot_delete_category_that_has_coa(): void
     {
         $category = Category::factory()->expense()->create(['name' => 'Transport Expense']);

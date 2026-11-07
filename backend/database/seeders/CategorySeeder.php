@@ -7,6 +7,9 @@ use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
+    /**
+     * Menjalankan seeder untuk inisialisasi data kategori awal (Salary, Other Income, Expense, dll).
+     */
     public function run(): void
     {
         $categoriesData = [

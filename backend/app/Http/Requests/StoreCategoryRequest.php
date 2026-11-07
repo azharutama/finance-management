@@ -7,12 +7,17 @@ use Illuminate\Validation\Rule;
 
 class StoreCategoryRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi penyimpanan kategori.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi pembuatan kategori baru (nama wajib unik).
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -22,6 +27,9 @@ class StoreCategoryRequest extends FormRequest
         ];
     }
 
+    /**
+     * Sanitasi dan trim spasi pada input nama kategori.
+     */
     protected function prepareForValidation(): void
     {
         if ($this->has('name') && is_string($this->input('name'))) {

@@ -21,6 +21,9 @@ class ChartOfAccount extends Model
         'category_id',
     ];
 
+    /**
+     * Konfigurasi tipe casting atribut model COA.
+     */
     protected function casts(): array
     {
         return [
@@ -29,6 +32,8 @@ class ChartOfAccount extends Model
     }
 
     /**
+     * Relasi BelongsTo ke model Category.
+     *
      * @return BelongsTo<Category, $this>
      */
     public function category(): BelongsTo
@@ -37,6 +42,8 @@ class ChartOfAccount extends Model
     }
 
     /**
+     * Relasi HasMany ke riwayat transaksi keuangan.
+     *
      * @return HasMany<Transaction, $this>
      */
     public function transactions(): HasMany

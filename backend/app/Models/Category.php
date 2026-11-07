@@ -18,6 +18,8 @@ class Category extends Model
     ];
 
     /**
+     * Relasi HasMany ke akun Chart of Account (COA).
+     *
      * @return HasMany<ChartOfAccount, $this>
      */
     public function chartOfAccounts(): HasMany
@@ -26,6 +28,8 @@ class Category extends Model
     }
 
     /**
+     * Relasi HasManyThrough ke transaksi melalui COA.
+     *
      * @return HasManyThrough<Transaction, ChartOfAccount, $this>
      */
     public function transactions(): HasManyThrough

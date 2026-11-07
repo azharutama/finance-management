@@ -12,6 +12,9 @@ class ChartOfAccountApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Memastikan siklus CRUD COA (create, show, list filter, update, delete) berjalan dengan benar.
+     */
     public function test_can_crud_chart_of_account(): void
     {
         $category = Category::factory()->income()->create(['name' => 'Salary']);
@@ -29,6 +32,24 @@ class ChartOfAccountApiTest extends TestCase
             ->assertJsonPath('data.category.name', 'Salary');
 
         $coaId = $createResponse->json('data.id');
+
+        // Show single COA
+        $this->getJson("/api/v1/coa/{$coaId}")
+            ->assertStatus(200)
+            ->assertJsonPath('data.code', '401')
+            ->assertJsonPath('data.name', 'Gaji Karyawan');
+
+        // List paginated with search & category filter
+        $this->getJson("/api/v1/coa?category_id={$category->id}&search=401")
+            ->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(1, 'data');
+
+        // List all unpaginated
+        $allRes = $this->getJson('/api/v1/coa?all=true');
+        $allRes->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('meta', null);
 
         // Duplicate code fails with 422
         $this->postJson('/api/v1/coa', [
@@ -52,6 +73,9 @@ class ChartOfAccountApiTest extends TestCase
         $this->assertDatabaseMissing('chart_of_accounts', ['id' => $coaId]);
     }
 
+    /**
+     * Memastikan COA dilarang dihapus (409 Conflict) jika sudah pernah digunakan dalam riwayat transaksi.
+     */
     public function test_cannot_delete_coa_used_in_transactions(): void
     {
         $category = Category::factory()->expense()->create(['name' => 'Meal Expense']);

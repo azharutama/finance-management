@@ -11,6 +11,9 @@ class DashboardSummaryApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Memastikan ringkasan dashboard menjumlahkan credit dan debit hanya untuk bulan yang diminta.
+     */
     public function test_summary_sums_credit_and_debit_for_requested_month_only(): void
     {
         $coa = ChartOfAccount::factory()->create();
@@ -37,6 +40,9 @@ class DashboardSummaryApiTest extends TestCase
             ->assertJsonPath('data.debit_count', 1);
     }
 
+    /**
+     * Memastikan ringkasan dashboard menggunakan bulan berjalan jika parameter month tidak diisi.
+     */
     public function test_summary_defaults_to_current_month(): void
     {
         $this->getJson('/api/v1/reports/dashboard-summary')
@@ -44,6 +50,9 @@ class DashboardSummaryApiTest extends TestCase
             ->assertJsonPath('data.month', now()->format('Y-m'));
     }
 
+    /**
+     * Memastikan format bulan yang tidak valid (misal bulan 13) ditolak dengan status 422.
+     */
     public function test_invalid_month_is_rejected(): void
     {
         $this->getJson('/api/v1/reports/dashboard-summary?month=2026-13')

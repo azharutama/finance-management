@@ -14,10 +14,16 @@ use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
+    /**
+     * Inisialisasi controller dengan dependency TransactionService.
+     */
     public function __construct(
         private readonly TransactionService $transactionService
     ) {}
 
+    /**
+     * Menampilkan daftar transaksi dengan filter COA, kategori, rentang tanggal, dan paginasi.
+     */
     public function index(TransactionFilterRequest $request): JsonResponse
     {
         $paginator = $this->transactionService->list($request->validated());
@@ -28,6 +34,9 @@ class TransactionController extends Controller
         );
     }
 
+    /**
+     * Menyimpan pencatatan transaksi baru (debit atau credit).
+     */
     public function store(StoreTransactionRequest $request): JsonResponse
     {
         $transaction = $this->transactionService->create(
@@ -41,6 +50,9 @@ class TransactionController extends Controller
         );
     }
 
+    /**
+     * Menampilkan detail satu transaksi beserta relasi COA dan kategorinya.
+     */
     public function show(Transaction $transaction): JsonResponse
     {
         $transaction->load([
@@ -54,6 +66,9 @@ class TransactionController extends Controller
         );
     }
 
+    /**
+     * Memperbarui data transaksi yang sudah dicatat sebelumnya.
+     */
     public function update(UpdateTransactionRequest $request, Transaction $transaction): JsonResponse
     {
         $updated = $this->transactionService->update($transaction, $request->validated());
@@ -64,6 +79,9 @@ class TransactionController extends Controller
         );
     }
 
+    /**
+     * Menghapus transaksi menggunakan Soft Delete agar riwayat audit keuangan tetap aman.
+     */
     public function destroy(Transaction $transaction): JsonResponse
     {
         $this->transactionService->delete($transaction);

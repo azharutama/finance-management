@@ -8,12 +8,17 @@ use Illuminate\Validation\Rule;
 
 class UpdateChartOfAccountRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi pembaruan akun COA.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi pembaruan COA dengan pengecualian ID COA saat ini.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -33,6 +38,9 @@ class UpdateChartOfAccountRequest extends FormRequest
         ];
     }
 
+    /**
+     * Sanitasi dan trim spasi pada input kode dan nama COA.
+     */
     protected function prepareForValidation(): void
     {
         if ($this->has('code') && is_string($this->input('code'))) {

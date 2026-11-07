@@ -12,6 +12,9 @@ class TransactionApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Memverifikasi validasi transaksi debit/credit, CRUD transaksi, filter, dan Soft Delete.
+     */
     public function test_can_record_income_and_expense_transactions_and_enforce_debit_credit_rules(): void
     {
         $incomeCategory = Category::factory()->income()->create(['name' => 'Salary']);
@@ -93,6 +96,24 @@ class TransactionApiTest extends TestCase
             'debit' => -1000,
             'credit' => 0,
         ])->assertStatus(422);
+
+        // Show single transaction
+        $incomeTxId = $incomeTx->json('data.id');
+        $this->getJson("/api/v1/transactions/{$incomeTxId}")
+            ->assertStatus(200)
+            ->assertJsonPath('data.id', $incomeTxId)
+            ->assertJsonPath('data.description', 'Gaji Januari');
+
+        // Update transaction
+        $this->putJson("/api/v1/transactions/{$incomeTxId}", [
+            'date' => '2026-01-02',
+            'coa_id' => $incomeCoa->id,
+            'description' => 'Gaji Januari (Revisi)',
+            'debit' => 0,
+            'credit' => 5500000,
+        ])->assertStatus(200)
+            ->assertJsonPath('data.description', 'Gaji Januari (Revisi)')
+            ->assertJsonPath('data.credit', 5500000);
 
         // Filter transactions by category_id and date range
         $listResponse = $this->getJson("/api/v1/transactions?category_id={$expenseCategory->id}&start_date=2026-01-01&end_date=2026-01-31");

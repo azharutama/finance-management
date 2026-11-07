@@ -6,12 +6,17 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi request login.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi email dan password login.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array

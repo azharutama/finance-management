@@ -8,12 +8,17 @@ use Illuminate\Validation\Rule;
 
 class UpdateCategoryRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi pembaruan kategori.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi pembaruan kategori dengan pengecualian ID kategori saat ini.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -31,6 +36,9 @@ class UpdateCategoryRequest extends FormRequest
         ];
     }
 
+    /**
+     * Sanitasi dan trim spasi pada input nama kategori.
+     */
     protected function prepareForValidation(): void
     {
         if ($this->has('name') && is_string($this->input('name'))) {

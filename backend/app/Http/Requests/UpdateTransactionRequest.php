@@ -10,12 +10,17 @@ use Illuminate\Validation\Validator;
 
 class UpdateTransactionRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi pembaruan transaksi.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi pembaruan transaksi keuangan.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -29,6 +34,9 @@ class UpdateTransactionRequest extends FormRequest
         ];
     }
 
+    /**
+     * Normalisasi nilai default debit/credit dan trim keterangan.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([
@@ -38,6 +46,9 @@ class UpdateTransactionRequest extends FormRequest
         ]);
     }
 
+    /**
+     * Validasi lanjutan: memastikan salah satu debit atau credit bernilai > 0.
+     */
     public function after(): array
     {
         return [

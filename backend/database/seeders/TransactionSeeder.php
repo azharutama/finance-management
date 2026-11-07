@@ -9,6 +9,9 @@ use Illuminate\Database\Seeder;
 
 class TransactionSeeder extends Seeder
 {
+    /**
+     * Menjalankan seeder untuk mengisi data transaksi awal tahun 2022 (Januari - Maret).
+     */
     public function run(): void
     {
         if (Transaction::count() > 0) {

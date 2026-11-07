@@ -11,10 +11,16 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
+    /**
+     * Inisialisasi controller dengan dependency AuthService.
+     */
     public function __construct(
         private readonly AuthService $authService
     ) {}
 
+    /**
+     * Memproses otentikasi login pengguna dan mengembalikan token akses.
+     */
     public function login(LoginRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -31,6 +37,9 @@ class AuthController extends Controller
         ], 'Logged in successfully.');
     }
 
+    /**
+     * Mencabut token akses sesi pengguna yang sedang login (logout).
+     */
     public function logout(Request $request): JsonResponse
     {
         $this->authService->logout($request->user());
@@ -38,6 +47,9 @@ class AuthController extends Controller
         return ApiResponse::success(null, 'Logged out successfully.');
     }
 
+    /**
+     * Mengambil informasi profil pengguna yang sedang terotentikasi.
+     */
     public function me(Request $request): JsonResponse
     {
         return ApiResponse::success(

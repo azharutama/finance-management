@@ -51,7 +51,7 @@
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
-            "php -d extension=pdo_sqlite -d extension=sqlite3 -d extension=zip vendor/bin/phpunit"
+            "@php artisan test"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

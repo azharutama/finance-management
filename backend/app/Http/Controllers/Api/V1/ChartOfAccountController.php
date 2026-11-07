@@ -15,10 +15,16 @@ use Illuminate\Http\Request;
 
 class ChartOfAccountController extends Controller
 {
+    /**
+     * Inisialisasi controller dengan dependency ChartOfAccountService.
+     */
     public function __construct(
         private readonly ChartOfAccountService $coaService
     ) {}
 
+    /**
+     * Menampilkan daftar COA dengan relasi kategori, filter, dan paginasi.
+     */
     public function index(ChartOfAccountFilterRequest $request): JsonResponse
     {
         $result = $this->coaService->list($request->validated());
@@ -36,6 +42,9 @@ class ChartOfAccountController extends Controller
         );
     }
 
+    /**
+     * Menyimpan data Chart of Account baru ke database.
+     */
     public function store(StoreChartOfAccountRequest $request): JsonResponse
     {
         $coa = $this->coaService->create($request->validated());
@@ -46,6 +55,9 @@ class ChartOfAccountController extends Controller
         );
     }
 
+    /**
+     * Menampilkan detail satu akun COA beserta relasi kategori dan jumlah transaksi.
+     */
     public function show(ChartOfAccount $coa): JsonResponse
     {
         $coa->load('category:id,name')->loadCount('transactions');
@@ -56,6 +68,9 @@ class ChartOfAccountController extends Controller
         );
     }
 
+    /**
+     * Memperbarui informasi akun COA (kode, nama, atau kategori).
+     */
     public function update(UpdateChartOfAccountRequest $request, ChartOfAccount $coa): JsonResponse
     {
         $updated = $this->coaService->update($coa, $request->validated());
@@ -66,6 +81,9 @@ class ChartOfAccountController extends Controller
         );
     }
 
+    /**
+     * Menghapus akun COA jika belum pernah digunakan dalam riwayat transaksi.
+     */
     public function destroy(ChartOfAccount $coa): JsonResponse
     {
         $this->coaService->delete($coa);

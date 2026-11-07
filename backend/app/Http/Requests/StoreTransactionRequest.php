@@ -10,12 +10,17 @@ use Illuminate\Validation\Validator;
 
 class StoreTransactionRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi penyimpanan transaksi.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi input tanggal, COA, keterangan, dan nominal debit/credit.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -29,6 +34,9 @@ class StoreTransactionRequest extends FormRequest
         ];
     }
 
+    /**
+     * Normalisasi default debit/credit ke 0 dan trim deskripsi.
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([
@@ -38,6 +46,9 @@ class StoreTransactionRequest extends FormRequest
         ]);
     }
 
+    /**
+     * Validasi lanjutan: memastikan hanya salah satu dari debit atau credit yang bernilai > 0.
+     */
     public function after(): array
     {
         return [

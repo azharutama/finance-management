@@ -68,11 +68,11 @@ class ChartOfAccountService
             /** @var ChartOfAccount $locked */
             $locked = ChartOfAccount::whereKey($coa->id)->lockForUpdate()->firstOrFail();
 
-            $newCategoryId = (int) $data['category_id'];
+            $newCategoryId = (int) ($data['category_id'] ?? $locked->category_id);
 
             $locked->update([
-                'code' => $data['code'],
-                'name' => $data['name'],
+                'code' => $data['code'] ?? $locked->code,
+                'name' => $data['name'] ?? $locked->name,
                 'category_id' => $newCategoryId,
             ]);
 

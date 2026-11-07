@@ -186,12 +186,19 @@ const recentTransactions = ref<Transaction[]>([]);
 
 // Current month boundaries (local time) — only this month's data is shown.
 const now = new Date();
+
+/**
+ * Menambahkan angka 0 di depan digit tunggal untuk pembentukan tanggal YYYY-MM-DD.
+ */
 const pad = (n: number) => String(n).padStart(2, '0');
 const currentMonth = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
 const monthStart = `${currentMonth}-01`;
 const monthEnd = `${currentMonth}-${pad(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate())}`;
 const currentMonthLabel = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(now);
 
+/**
+ * Memuat ringkasan KPI bulan berjalan dan 5 transaksi terkini saat halaman dimount.
+ */
 onMounted(async () => {
   try {
     const [summaryRes, txRes] = await Promise.all([

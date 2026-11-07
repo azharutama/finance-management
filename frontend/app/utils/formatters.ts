@@ -1,3 +1,6 @@
+/**
+ * Memformat nilai angka ke dalam format mata uang Rupiah (IDR).
+ */
 export function formatCurrency(value: number | string | null | undefined): string {
   const num = typeof value === 'string' ? parseFloat(value) : (value ?? 0);
   if (isNaN(num)) return 'Rp 0';
@@ -8,6 +11,9 @@ export function formatCurrency(value: number | string | null | undefined): strin
   }).format(num);
 }
 
+/**
+ * Memformat string tanggal (YYYY-MM-DD) ke dalam format bahasa Indonesia (DD MMM YYYY).
+ */
 export function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '-';
   const date = new Date(dateStr);

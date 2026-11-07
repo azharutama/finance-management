@@ -7,12 +7,17 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ChartOfAccountFilterRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi request filter COA.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi query parameter pencarian, relasi kategori, dan paginasi COA.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -26,6 +31,9 @@ class ChartOfAccountFilterRequest extends FormRequest
         ];
     }
 
+    /**
+     * Normalisasi nilai boolean sebelum divalidasi.
+     */
     protected function prepareForValidation(): void
     {
         if ($this->has('all') && $this->input('all') !== null && $this->input('all') !== '') {

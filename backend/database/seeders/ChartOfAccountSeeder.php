@@ -8,6 +8,9 @@ use Illuminate\Database\Seeder;
 
 class ChartOfAccountSeeder extends Seeder
 {
+    /**
+     * Menjalankan seeder untuk inisialisasi akun-akun COA (401 - 605) sesuai acuan spreadsheet.
+     */
     public function run(): void
     {
         $categories = Category::pluck('id', 'name');

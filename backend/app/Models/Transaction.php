@@ -21,6 +21,9 @@ class Transaction extends Model
         'credit',
     ];
 
+    /**
+     * Konfigurasi tipe casting atribut nominal dan tanggal transaksi.
+     */
     protected function casts(): array
     {
         return [
@@ -32,6 +35,8 @@ class Transaction extends Model
     }
 
     /**
+     * Relasi BelongsTo ke akun COA transaksi.
+     *
      * @return BelongsTo<ChartOfAccount, $this>
      */
     public function coa(): BelongsTo
@@ -40,6 +45,8 @@ class Transaction extends Model
     }
 
     /**
+     * Alias relasi BelongsTo ke akun COA transaksi.
+     *
      * @return BelongsTo<ChartOfAccount, $this>
      */
     public function chartOfAccount(): BelongsTo

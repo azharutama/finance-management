@@ -171,11 +171,17 @@ const startMonth = ref('2022-01');
 const endMonth = ref('2022-03');
 const filterError = ref('');
 
+/**
+ * Memformat angka nominal menjadi string bilangan dengan pemisah ribuan.
+ */
 const formatNumber = (val: number | null | undefined): string => {
   if (val === null || val === undefined || isNaN(val)) return '0';
   return new Intl.NumberFormat('id-ID').format(val);
 };
 
+/**
+ * Mengambil data kalkulasi matriks Profit & Loss dari API berdasarkan rentang bulan.
+ */
 const fetchReport = async () => {
   filterError.value = '';
   if (startMonth.value > endMonth.value) {
@@ -199,6 +205,9 @@ const fetchReport = async () => {
   }
 };
 
+/**
+ * Mengunduh berkas laporan Excel (.xlsx) dari backend dengan nama file berperiode.
+ */
 const handleExportExcel = async () => {
   exporting.value = true;
   try {

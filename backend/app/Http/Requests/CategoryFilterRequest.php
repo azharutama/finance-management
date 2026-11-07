@@ -6,12 +6,17 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CategoryFilterRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi request filter kategori.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi query parameter filter kategori.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -24,6 +29,9 @@ class CategoryFilterRequest extends FormRequest
         ];
     }
 
+    /**
+     * Normalisasi nilai boolean sebelum divalidasi.
+     */
     protected function prepareForValidation(): void
     {
         if ($this->has('all') && $this->input('all') !== null && $this->input('all') !== '') {

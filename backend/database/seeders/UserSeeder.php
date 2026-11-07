@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * Menjalankan seeder untuk membuat akun pengguna awal (Administrator dan Staff Viewer).
+     */
     public function run(): void
     {
         User::updateOrCreate(

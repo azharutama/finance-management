@@ -15,18 +15,25 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class ProfitAndLossExport implements FromArray, WithColumnWidths, WithStyles, WithTitle
 {
     /**
+     * Inisialisasi export class dengan data laporan Profit & Loss.
+     *
      * @param  array<string, mixed>  $report
      */
     public function __construct(
         private readonly array $report
     ) {}
 
+    /**
+     * Menentukan judul worksheet Excel.
+     */
     public function title(): string
     {
         return 'Profit & Loss';
     }
 
     /**
+     * Membentuk struktur matriks baris data Excel (Header, Income, Total Income, Expense, Total Expense, Net Income).
+     *
      * @return array<int, array<int, mixed>>
      */
     public function array(): array
@@ -95,6 +102,8 @@ class ProfitAndLossExport implements FromArray, WithColumnWidths, WithStyles, Wi
     }
 
     /**
+     * Mengatur lebar kolom agar tampilan teks dan angka Excel rapi dan terbaca.
+     *
      * @return array<string, int>
      */
     public function columnWidths(): array
@@ -110,6 +119,9 @@ class ProfitAndLossExport implements FromArray, WithColumnWidths, WithStyles, Wi
         return $widths;
     }
 
+    /**
+     * Menerapkan pewarnaan sel, border, font bold, dan format angka Excel sesuai acuan spreadsheet.
+     */
     public function styles(Worksheet $sheet): array
     {
         $monthsCount = count($this->report['months'] ?? []);

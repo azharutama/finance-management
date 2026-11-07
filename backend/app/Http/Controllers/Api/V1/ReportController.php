@@ -15,11 +15,17 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportController extends Controller
 {
+    /**
+     * Inisialisasi controller dengan ProfitAndLossService dan DashboardSummaryService.
+     */
     public function __construct(
         private readonly ProfitAndLossService $profitAndLossService,
         private readonly DashboardSummaryService $dashboardSummaryService
     ) {}
 
+    /**
+     * Menghasilkan ringkasan KPI dashboard (total income, total expense, net income, count) bulanan.
+     */
     public function dashboardSummary(DashboardSummaryRequest $request): JsonResponse
     {
         $summary = $this->dashboardSummaryService->summarize($request->validated('month'));
@@ -30,6 +36,9 @@ class ReportController extends Controller
         );
     }
 
+    /**
+     * Menghasilkan laporan laba rugi (Profit & Loss) bulanan sesuai struktur format spreadsheet.
+     */
     public function profitAndLoss(ProfitLossReportRequest $request): JsonResponse
     {
         $report = $this->profitAndLossService->generateReport($request->validated());
@@ -40,6 +49,9 @@ class ReportController extends Controller
         );
     }
 
+    /**
+     * Mengekspor data laporan laba rugi ke dalam file spreadsheet Excel (.xlsx).
+     */
     public function exportProfitAndLoss(ProfitLossReportRequest $request): BinaryFileResponse
     {
         $report = $this->profitAndLossService->generateReport($request->validated());

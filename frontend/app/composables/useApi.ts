@@ -1,8 +1,14 @@
 import type { ApiResponse } from '~/types';
 
+/**
+ * Composable HTTP client untuk komunikasi ke Backend Laravel REST API.
+ */
 export const useApi = () => {
   const config = useRuntimeConfig();
 
+  /**
+   * Mengirim request HTTP menggunakan $fetch dengan header terstandarisasi.
+   */
   const request = async <T>(endpoint: string, options: Parameters<typeof $fetch>[1] = {}): Promise<ApiResponse<T>> => {
     const headers: Record<string, string> = {
       Accept: 'application/json',

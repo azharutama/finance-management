@@ -178,6 +178,9 @@ const form = reactive({
 });
 
 let searchTimeout: any = null;
+/**
+ * Menunda pencarian akun COA dengan debounce 350ms.
+ */
 const debounceSearch = () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
@@ -185,6 +188,9 @@ const debounceSearch = () => {
   }, 350);
 };
 
+/**
+ * Mengambil daftar COA dari backend dengan filter kode/nama dan kategori.
+ */
 const fetchCoa = async (page = 1) => {
   loading.value = true;
   try {
@@ -204,6 +210,9 @@ const fetchCoa = async (page = 1) => {
   }
 };
 
+/**
+ * Mengambil seluruh daftar kategori untuk opsi pilihan dropdown form modal.
+ */
 const fetchCategoriesList = async () => {
   try {
     const res = await api.get<Category[]>('/categories', { all: true });
@@ -215,6 +224,9 @@ const fetchCategoriesList = async () => {
   }
 };
 
+/**
+ * Membuka modal dialog untuk tambah baru atau ubah akun COA.
+ */
 const openModal = (coa?: ChartOfAccount) => {
   formError.value = '';
   if (coa) {
@@ -231,6 +243,9 @@ const openModal = (coa?: ChartOfAccount) => {
   showModal.value = true;
 };
 
+/**
+ * Menyimpan data COA baru (POST) atau memperbarui COA yang ada (PUT).
+ */
 const saveCoa = async () => {
   saving.value = true;
   formError.value = '';
@@ -249,6 +264,9 @@ const saveCoa = async () => {
   }
 };
 
+/**
+ * Menghapus akun COA jika belum pernah dipakai di transaksi riwayat.
+ */
 const handleDelete = async (coa: ChartOfAccount) => {
   if (!confirm(`Apakah Anda yakin ingin menghapus COA "${coa.code} - ${coa.name}"?`)) return;
   try {

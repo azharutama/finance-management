@@ -7,6 +7,9 @@ use PHPUnit\Framework\TestCase;
 
 class ProfitAndLossExportServiceTest extends TestCase
 {
+    /**
+     * Memastikan baris data yang dibentuk export class sesuai dengan spesifikasi spreadsheet.
+     */
     public function test_it_builds_export_rows_matching_spreadsheet_structure(): void
     {
         $sampleReport = [

@@ -7,12 +7,17 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class TransactionFilterRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi filter transaksi.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi filter transaksi (pencarian, rentang tanggal, COA, kategori, dan paginasi).
+     *
      * @return array<string, mixed>
      */
     public function rules(): array

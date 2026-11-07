@@ -15,10 +15,16 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    /**
+     * Inisialisasi controller dengan dependency CategoryService.
+     */
     public function __construct(
         private readonly CategoryService $categoryService
     ) {}
 
+    /**
+     * Menampilkan daftar kategori dengan filter pencarian dan opsi paginasi.
+     */
     public function index(CategoryFilterRequest $request): JsonResponse
     {
         $result = $this->categoryService->list($request->validated());
@@ -36,6 +42,9 @@ class CategoryController extends Controller
         );
     }
 
+    /**
+     * Menyimpan data kategori baru.
+     */
     public function store(StoreCategoryRequest $request): JsonResponse
     {
         $category = $this->categoryService->create($request->validated());
@@ -46,6 +55,9 @@ class CategoryController extends Controller
         );
     }
 
+    /**
+     * Menampilkan detail satu data kategori beserta jumlah relasi COA.
+     */
     public function show(Category $category): JsonResponse
     {
         $category->loadCount('chartOfAccounts');
@@ -56,6 +68,9 @@ class CategoryController extends Controller
         );
     }
 
+    /**
+     * Memperbarui informasi nama data kategori yang sudah ada.
+     */
     public function update(UpdateCategoryRequest $request, Category $category): JsonResponse
     {
         $updated = $this->categoryService->update($category, $request->validated());
@@ -66,6 +81,9 @@ class CategoryController extends Controller
         );
     }
 
+    /**
+     * Menghapus data kategori (jika belum memiliki anak akun COA).
+     */
     public function destroy(Category $category): JsonResponse
     {
         $this->categoryService->delete($category);

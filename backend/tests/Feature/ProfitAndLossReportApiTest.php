@@ -15,6 +15,9 @@ class ProfitAndLossReportApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Memverifikasi kalkulasi Profit & Loss per bulan dan fungsionalitas unduh Excel.
+     */
     public function test_it_calculates_profit_and_loss_per_month_including_empty_months_and_exports_excel_with_maatwebsite(): void
     {
         Excel::fake();

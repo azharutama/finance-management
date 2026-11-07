@@ -8,12 +8,17 @@ use Illuminate\Validation\Rule;
 
 class StoreChartOfAccountRequest extends FormRequest
 {
+    /**
+     * Menentukan izin otorisasi penyimpanan akun COA.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Aturan validasi pembuatan COA baru (kode unik, nama, dan relasi kategori).
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -25,6 +30,9 @@ class StoreChartOfAccountRequest extends FormRequest
         ];
     }
 
+    /**
+     * Sanitasi dan trim spasi pada input kode dan nama COA.
+     */
     protected function prepareForValidation(): void
     {
         if ($this->has('code') && is_string($this->input('code'))) {

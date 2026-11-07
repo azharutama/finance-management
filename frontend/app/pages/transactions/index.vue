@@ -251,6 +251,9 @@ const form = reactive({
 const entryType = ref<'debit' | 'credit'>('debit');
 
 let searchTimeout: any = null;
+/**
+ * Menunda eksekusi pencarian transaksi dengan debounce 350ms.
+ */
 const debounceSearch = () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
@@ -258,6 +261,9 @@ const debounceSearch = () => {
   }, 350);
 };
 
+/**
+ * Mengambil data transaksi dengan filter pencarian, COA, kategori, rentang tanggal, dan paginasi.
+ */
 const fetchTransactions = async (page = 1) => {
   loading.value = true;
   try {
@@ -280,6 +286,9 @@ const fetchTransactions = async (page = 1) => {
   }
 };
 
+/**
+ * Mengambil daftar opsi COA dan Kategori untuk pilihan filter dan modal form.
+ */
 const fetchFilterOptions = async () => {
   try {
     const [coaRes, catRes] = await Promise.all([
@@ -293,6 +302,9 @@ const fetchFilterOptions = async () => {
   }
 };
 
+/**
+ * Membuka modal form transaksi untuk pencatatan baru atau pengubahan data.
+ */
 const openModal = (tx?: Transaction) => {
   formError.value = '';
   if (tx) {
@@ -317,6 +329,9 @@ const openModal = (tx?: Transaction) => {
   showModal.value = true;
 };
 
+/**
+ * Menyimpan data transaksi ke API dengan memetakan nominal ke kolom debit atau credit.
+ */
 const saveTransaction = async () => {
   saving.value = true;
   formError.value = '';
@@ -351,6 +366,9 @@ const saveTransaction = async () => {
   }
 };
 
+/**
+ * Melakukan penghapusan data transaksi (Soft Delete) setelah konfirmasi.
+ */
 const handleDelete = async (tx: Transaction) => {
   if (!confirm(`Apakah Anda yakin ingin menghapus transaksi "${tx.description}"?`)) return;
   try {

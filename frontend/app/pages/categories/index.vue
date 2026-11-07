@@ -133,6 +133,9 @@ const form = reactive({
 });
 
 let searchTimeout: any = null;
+/**
+ * Menunda pencarian dengan debounce 350ms agar tidak spam request API.
+ */
 const debounceSearch = () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
@@ -140,6 +143,9 @@ const debounceSearch = () => {
   }, 350);
 };
 
+/**
+ * Mengambil daftar data kategori dari backend sesuai halaman dan kata kunci pencarian.
+ */
 const fetchCategories = async (page = 1) => {
   loading.value = true;
   try {
@@ -158,6 +164,9 @@ const fetchCategories = async (page = 1) => {
   }
 };
 
+/**
+ * Membuka modal dialog untuk tambah baru atau ubah kategori.
+ */
 const openModal = (cat?: Category) => {
   formError.value = '';
   if (cat) {
@@ -170,6 +179,9 @@ const openModal = (cat?: Category) => {
   showModal.value = true;
 };
 
+/**
+ * Mengirim request simpan (POST untuk baru, PUT untuk ubah) ke API.
+ */
 const saveCategory = async () => {
   saving.value = true;
   formError.value = '';
@@ -188,6 +200,9 @@ const saveCategory = async () => {
   }
 };
 
+/**
+ * Menghapus kategori setelah konfirmasi pengguna.
+ */
 const handleDelete = async (cat: Category) => {
   if (!confirm(`Hapus kategori "${cat.name}"?`)) return;
   try {
