@@ -305,8 +305,11 @@ const fetchFilterOptions = async () => {
 /**
  * Membuka modal form transaksi untuk pencatatan baru atau pengubahan data.
  */
-const openModal = (tx?: Transaction) => {
+const openModal = async (tx?: Transaction) => {
   formError.value = '';
+  if (coaOptions.value.length === 0) {
+    await fetchFilterOptions();
+  }
   if (tx) {
     editingTransaction.value = tx;
     form.date = tx.date;

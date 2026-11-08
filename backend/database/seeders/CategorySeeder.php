@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Cache;
 
 class CategorySeeder extends Seeder
 {
@@ -25,5 +26,7 @@ class CategorySeeder extends Seeder
                 ['name' => $cat['name']]
             );
         }
+
+        Cache::forget('categories:all');
     }
 }

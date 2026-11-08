@@ -3,7 +3,7 @@
     <div class="space-y-6">
       <!-- Header -->
       <PageHeader
-        title="Master Chart of Account (COA)"
+        title="Chart of Account (COA)"
         description="Kelola akun COA (401 - Gaji Karyawan, 602 - Bensin, dsb.) beserta relasi kategorinya"
       >
         <template #actions>
@@ -227,8 +227,11 @@ const fetchCategoriesList = async () => {
 /**
  * Membuka modal dialog untuk tambah baru atau ubah akun COA.
  */
-const openModal = (coa?: ChartOfAccount) => {
+const openModal = async (coa?: ChartOfAccount) => {
   formError.value = '';
+  if (allCategories.value.length === 0) {
+    await fetchCategoriesList();
+  }
   if (coa) {
     editingCoa.value = coa;
     form.code = coa.code;

@@ -69,7 +69,7 @@
             <!-- Income Categories (Clean White with Soft Emerald Dot) -->
             <tr
               v-for="cat in report.income_categories"
-              :key="cat.category_id"
+              :key="'inc-' + cat.category_id"
               class="bg-white hover:bg-slate-50/70 transition-colors"
             >
               <td class="px-5 py-3 font-sans font-medium text-slate-800 border-r border-slate-100">
@@ -84,6 +84,14 @@
                 class="px-5 py-3 text-right border-r border-slate-100 text-slate-700 font-semibold"
               >
                 {{ formatNumber(cat.monthly[month]) }}
+              </td>
+            </tr>
+            <tr v-if="!report.income_categories.length" class="bg-white">
+              <td
+                :colspan="report.months.length + 1"
+                class="px-5 py-3 font-sans text-slate-400 italic text-xs"
+              >
+                Belum ada kategori pemasukan (Credit) yang memiliki transaksi pada periode ini.
               </td>
             </tr>
 
@@ -104,7 +112,7 @@
             <!-- Expense Categories (Clean White with Soft Orange Dot) -->
             <tr
               v-for="cat in report.expense_categories"
-              :key="cat.category_id"
+              :key="'exp-' + cat.category_id"
               class="bg-white hover:bg-slate-50/70 transition-colors"
             >
               <td class="px-5 py-3 font-sans font-medium text-slate-800 border-r border-slate-100">
@@ -119,6 +127,14 @@
                 class="px-5 py-3 text-right border-r border-slate-100 text-slate-700 font-semibold"
               >
                 {{ formatNumber(cat.monthly[month]) }}
+              </td>
+            </tr>
+            <tr v-if="!report.expense_categories.length" class="bg-white">
+              <td
+                :colspan="report.months.length + 1"
+                class="px-5 py-3 font-sans text-slate-400 italic text-xs"
+              >
+                Belum ada kategori pengeluaran (Debit) yang memiliki transaksi pada periode ini.
               </td>
             </tr>
 
@@ -167,8 +183,9 @@ const report = ref<ProfitLossReport | null>(null);
 const loading = ref(true);
 const exporting = ref(false);
 
-const startMonth = ref('2022-01');
-const endMonth = ref('2022-03');
+const currentYear = new Date().getFullYear();
+const startMonth = ref(`${currentYear}-01`);
+const endMonth = ref(`${currentYear}-12`);
 const filterError = ref('');
 
 /**

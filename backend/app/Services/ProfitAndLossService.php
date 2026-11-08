@@ -20,10 +20,6 @@ class ProfitAndLossService
 
         $months = $this->buildMonthsList($startDate, $endDate);
 
-        $categories = Category::query()
-            ->select(['id', 'name'])
-            ->get();
-
         $driver = DB::getDriverName();
         $monthExpression = match ($driver) {
             'sqlite' => "strftime('%Y-%m', transactions.date)",
@@ -46,58 +42,39 @@ class ProfitAndLossService
             ->get();
 
         $lookup = [];
+        $hasCredit = [];
+        $hasDebit = [];
+
         foreach ($aggregatedRows as $row) {
             $catId = (int) $row->category_id;
             $monthKey = (string) $row->period_month;
-            $lookup[$catId][$monthKey] = [
-                'debit' => round((float) $row->total_debit, 2),
-                'credit' => round((float) $row->total_credit, 2),
-            ];
+            $debit = round((float) $row->total_debit, 2);
+            $credit = round((float) $row->total_credit, 2);
+
+            if ($debit > 0 || $credit > 0) {
+                $lookup[$catId][$monthKey] = [
+                    'debit' => $debit,
+                    'credit' => $credit,
+                ];
+                if ($credit > 0) {
+                    $hasCredit[$catId] = true;
+                }
+                if ($debit > 0) {
+                    $hasDebit[$catId] = true;
+                }
+            }
         }
 
-        // Ambil riwayat akumulasi kredit dan debit per kategori dari transaksi (mengabaikan soft deletes)
-        $allTimeStats = DB::table('transactions')
-            ->join('chart_of_accounts', 'transactions.coa_id', '=', 'chart_of_accounts.id')
-            ->whereNull('transactions.deleted_at')
-            ->selectRaw("
-                chart_of_accounts.category_id,
-                COALESCE(SUM(transactions.credit), 0) as all_credit,
-                COALESCE(SUM(transactions.debit), 0) as all_debit
-            ")
-            ->groupBy('chart_of_accounts.category_id')
-            ->get()
-            ->keyBy('category_id');
+        // Hanya tampilkan kategori dan COA yang sudah memiliki transaksi pada periode laporan
+        $activeCategoryIds = array_keys($lookup);
 
-        // Fungsi penentu: kategori bertipe kredit (Income) vs bertipe debit (Expense) berdasarkan data transaksi
-        $isCreditCategory = function (Category $cat) use ($allTimeStats, $lookup): bool {
-            // Prioritaskan mutasi pada periode yang sedang difilter
-            $periodCredit = 0.0;
-            $periodDebit = 0.0;
-            if (isset($lookup[$cat->id])) {
-                foreach ($lookup[$cat->id] as $cell) {
-                    $periodCredit += $cell['credit'];
-                    $periodDebit += $cell['debit'];
-                }
-            }
-            if ($periodCredit > 0 || $periodDebit > 0) {
-                return $periodCredit >= $periodDebit;
-            }
-
-            // Jika periode aktif kosong, rujuk riwayat transaksi all-time
-            if ($stats = $allTimeStats->get($cat->id)) {
-                if ((float) $stats->all_credit > 0 || (float) $stats->all_debit > 0) {
-                    return (float) $stats->all_credit >= (float) $stats->all_debit;
-                }
-            }
-
-            // Kategori tanpa transaksi sama sekali ditempatkan di kelompok debit (nilai 0)
-            return false;
-        };
-
-        // Urutkan kategori kredit di atas, disusul kategori debit
-        $categories = $categories->sortBy(function ($cat) use ($isCreditCategory) {
-            return $isCreditCategory($cat) ? 0 : 1;
-        })->values();
+        $categories = empty($activeCategoryIds)
+            ? collect()
+            : Category::query()
+                ->select(['id', 'name'])
+                ->whereIn('id', $activeCategoryIds)
+                ->orderBy('id')
+                ->get();
 
         $incomeCategories = [];
         $expenseCategories = [];
@@ -111,47 +88,62 @@ class ProfitAndLossService
             ];
         }
 
+        // 1. Income: hitung transaksi yang berstatus Credit (credit > 0) per kategori
         foreach ($categories as $category) {
-            $isIncome = $isCreditCategory($category);
+            if (empty($hasCredit[$category->id])) {
+                continue;
+            }
+
             $monthlyValues = [];
             $categoryTotal = 0.0;
 
             foreach ($months as $month) {
-                $cell = $lookup[$category->id][$month] ?? ['debit' => 0.0, 'credit' => 0.0];
-                $amount = $isIncome
-                    ? ($cell['credit'] - $cell['debit'])
-                    : ($cell['debit'] - $cell['credit']);
-                $amount = round((float) $amount, 2);
-
+                $amount = round((float) ($lookup[$category->id][$month]['credit'] ?? 0.0), 2);
                 $monthlyValues[$month] = $amount;
                 $categoryTotal = round($categoryTotal + $amount, 2);
 
-                if ($isIncome) {
-                    $totalsByMonth[$month]['total_income'] = round(
-                        $totalsByMonth[$month]['total_income'] + $amount,
-                        2
-                    );
-                } else {
-                    $totalsByMonth[$month]['total_expense'] = round(
-                        $totalsByMonth[$month]['total_expense'] + $amount,
-                        2
-                    );
-                }
+                $totalsByMonth[$month]['total_income'] = round(
+                    $totalsByMonth[$month]['total_income'] + $amount,
+                    2
+                );
             }
 
-            $item = [
+            $incomeCategories[] = [
                 'category_id' => $category->id,
                 'category_name' => $category->name,
-                'type' => $isIncome ? 'income' : 'expense',
+                'type' => 'income',
                 'monthly' => $monthlyValues,
                 'total' => $categoryTotal,
             ];
+        }
 
-            if ($isIncome) {
-                $incomeCategories[] = $item;
-            } else {
-                $expenseCategories[] = $item;
+        // 2. Expense: hitung transaksi yang berstatus Debit (debit > 0) per kategori
+        foreach ($categories as $category) {
+            if (empty($hasDebit[$category->id])) {
+                continue;
             }
+
+            $monthlyValues = [];
+            $categoryTotal = 0.0;
+
+            foreach ($months as $month) {
+                $amount = round((float) ($lookup[$category->id][$month]['debit'] ?? 0.0), 2);
+                $monthlyValues[$month] = $amount;
+                $categoryTotal = round($categoryTotal + $amount, 2);
+
+                $totalsByMonth[$month]['total_expense'] = round(
+                    $totalsByMonth[$month]['total_expense'] + $amount,
+                    2
+                );
+            }
+
+            $expenseCategories[] = [
+                'category_id' => $category->id,
+                'category_name' => $category->name,
+                'type' => 'expense',
+                'monthly' => $monthlyValues,
+                'total' => $categoryTotal,
+            ];
         }
 
         $grandTotalIncome = 0.0;
@@ -204,15 +196,13 @@ class ProfitAndLossService
             return [$start, $end];
         }
 
+        $year = date('Y');
         if (empty($filters['start_month']) && empty($filters['end_month'])) {
-            $minDate = DB::table('transactions')->min('date');
-            $defaultYear = $minDate ? Carbon::parse($minDate)->format('Y') : date('Y');
-            $startMonthStr = "{$defaultYear}-01";
-            $endMonthStr = "{$defaultYear}-03";
+            $startMonthStr = "{$year}-01";
+            $endMonthStr = "{$year}-12";
         } else {
-            $year = date('Y');
             $startMonthStr = $filters['start_month'] ?? "{$year}-01";
-            $endMonthStr = $filters['end_month'] ?? ($filters['start_month'] ?? "{$year}-03");
+            $endMonthStr = $filters['end_month'] ?? ($filters['start_month'] ?? "{$year}-12");
         }
 
         $start = Carbon::createFromFormat('Y-m', $startMonthStr)->startOfMonth();

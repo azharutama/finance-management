@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\ChartOfAccount;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ChartOfAccountService
@@ -35,6 +36,20 @@ class ChartOfAccountService
         $query->orderBy('code');
 
         if (! empty($filters['all'])) {
+            if (empty($filters['search']) && empty($filters['category_id'])) {
+                $cached = Cache::get('coa:all');
+                if ($cached instanceof Collection && $cached->isNotEmpty()) {
+                    return $cached;
+                }
+
+                $items = $query->get();
+                if ($items->isNotEmpty()) {
+                    Cache::put('coa:all', $items, 3600);
+                }
+
+                return $items;
+            }
+
             return $query->get();
         }
 
@@ -54,6 +69,8 @@ class ChartOfAccountService
                 'name' => $data['name'],
                 'category_id' => (int) $data['category_id'],
             ]);
+
+            Cache::forget('coa:all');
 
             return $coa->load('category:id,name')->loadCount('transactions');
         });
@@ -76,6 +93,8 @@ class ChartOfAccountService
                 'category_id' => $newCategoryId,
             ]);
 
+            Cache::forget('coa:all');
+
             return $locked->load('category:id,name')->loadCount('transactions');
         });
     }
@@ -94,6 +113,8 @@ class ChartOfAccountService
             }
 
             $locked->delete();
+
+            Cache::forget('coa:all');
         });
     }
 }

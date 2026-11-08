@@ -123,8 +123,9 @@ Laporan Profit & Loss menyajikan ringkasan kinerja keuangan bulanan yang dikelom
 
 **Logika Agregasi Perhitungan Berdasarkan Tipe Transaksi:**
 1. **Penentuan Kategori Berdasarkan Tipe Transaksi (Kredit vs Debit):**
-   - **Kategori Pemasukan (*Credit Categories*):** Mengambil semua kategori yang memiliki transaksi bertipe **kredit** (`credit > 0`). Kategori-kategori ini dihitung (*count/sum*) per bulan dengan formula $\sum(\text{credit} - \text{debit})$.
-   - **Kategori Pengeluaran (*Debit Categories*):** Mengambil semua kategori yang memiliki transaksi bertipe **debit** (`debit > 0`). Kategori-kategori ini dihitung per bulan dengan formula $\sum(\text{debit} - \text{credit})$.
+   - **Kategori Pemasukan (*Credit Categories*):** Mengambil semua kategori yang memiliki transaksi bertipe **kredit** (`credit > 0`) pada periode terpilih. Kategori-kategori ini dihitung per bulan dengan formula $\sum(\text{credit})$.
+   - **Kategori Pengeluaran (*Debit Categories*):** Mengambil semua kategori yang memiliki transaksi bertipe **debit** (`debit > 0`) pada periode terpilih. Kategori-kategori ini dihitung per bulan dengan formula $\sum(\text{debit})$.
+   - Apabila sebuah kategori memiliki transaksi bertipe kredit sekaligus transaksi bertipe debit pada periode yang sama, maka nilai kreditnya ditampilkan per kategori pada kelompok **Income** dan nilai debitnya ditampilkan per kategori pada kelompok **Expense**. Kategori atau COA yang belum memiliki transaksi tidak ditampilkan.
 2. **Perhitungan Total Bulanan:**
    - **Total Income:** Diambil dari penjumlahan nominal seluruh kategori bertipe kredit pada bulan bersangkutan.
    - **Total Expense:** Diambil dari penjumlahan nominal seluruh kategori bertipe debit pada bulan bersangkutan.

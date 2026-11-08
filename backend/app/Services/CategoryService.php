@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Category;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class CategoryService
@@ -26,6 +27,20 @@ class CategoryService
         $query->orderBy('name');
 
         if (! empty($filters['all'])) {
+            if (empty($filters['search'])) {
+                $cached = Cache::get('categories:all');
+                if ($cached instanceof Collection && $cached->isNotEmpty()) {
+                    return $cached;
+                }
+
+                $items = $query->get();
+                if ($items->isNotEmpty()) {
+                    Cache::put('categories:all', $items, 3600);
+                }
+
+                return $items;
+            }
+
             return $query->get();
         }
 
@@ -44,6 +59,8 @@ class CategoryService
                 'name' => $data['name'],
             ]);
 
+            Cache::forget('categories:all');
+
             return $category->loadCount('chartOfAccounts');
         });
     }
@@ -60,6 +77,8 @@ class CategoryService
             $locked->update([
                 'name' => $data['name'] ?? $locked->name,
             ]);
+
+            Cache::forget('categories:all');
 
             return $locked->loadCount('chartOfAccounts');
         });
@@ -79,6 +98,8 @@ class CategoryService
             }
 
             $locked->delete();
+
+            Cache::forget('categories:all');
         });
     }
 }

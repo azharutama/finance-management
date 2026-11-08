@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\ChartOfAccount;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Cache;
 
 class ChartOfAccountSeeder extends Seeder
 {
@@ -40,5 +41,7 @@ class ChartOfAccountSeeder extends Seeder
                 ]
             );
         }
+
+        Cache::forget('coa:all');
     }
 }

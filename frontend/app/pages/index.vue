@@ -14,7 +14,7 @@
           </div>
           <h1 class="text-2xl font-black tracking-tight">Selamat Datang di Financial Management!</h1>
           <p class="text-sky-100 text-xs mt-1 leading-relaxed">
-            Kelola Master Kategori, Chart of Account (COA), pencatatan transaksi harian, serta Laporan Profit & Loss bulanan dengan export Excel otomatis.
+            Kelola Kategori, Chart of Account (COA), pencatatan transaksi harian, serta Laporan Profit & Loss bulanan dengan export Excel otomatis.
           </p>
         </div>
       </div>
@@ -92,7 +92,7 @@
             <span class="text-xs text-orange-600 font-bold mt-4 inline-flex items-center gap-1">Lihat Laporan &rarr;</span>
           </NuxtLink>
 
-          <!-- Master Kategori -->
+          <!-- Kategori -->
           <NuxtLink to="/categories" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-sky-500 hover:shadow-md transition-all group relative overflow-hidden flex flex-col justify-between">
             <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,13 +100,13 @@
               </svg>
             </div>
             <div>
-              <h3 class="font-bold text-slate-900 text-sm group-hover:text-sky-600 transition-colors">Master Kategori</h3>
+              <h3 class="font-bold text-slate-900 text-sm group-hover:text-sky-600 transition-colors">Kategori</h3>
               <p class="text-xs text-slate-500 mt-1">Kelompok Salary, Expense, Meal, dsb.</p>
             </div>
             <span class="text-xs text-sky-600 font-bold mt-4 inline-flex items-center gap-1">Kelola Kategori &rarr;</span>
           </NuxtLink>
 
-          <!-- Master COA -->
+          <!-- Chart of Account (COA) -->
           <NuxtLink to="/coa" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-orange-500 hover:shadow-md transition-all group relative overflow-hidden flex flex-col justify-between">
             <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +114,7 @@
               </svg>
             </div>
             <div>
-              <h3 class="font-bold text-slate-900 text-sm group-hover:text-orange-600 transition-colors">Master COA</h3>
+              <h3 class="font-bold text-slate-900 text-sm group-hover:text-orange-600 transition-colors">Chart of Account (COA)</h3>
               <p class="text-xs text-slate-500 mt-1">Kode rekening 401, 602, dan akun keuangan.</p>
             </div>
             <span class="text-xs text-orange-600 font-bold mt-4 inline-flex items-center gap-1">Kelola COA &rarr;</span>

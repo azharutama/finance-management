@@ -76,6 +76,8 @@ class TransactionService
                 'credit' => round((float) ($data['credit'] ?? 0), 2),
             ]);
 
+            DashboardSummaryService::clearCache(substr($data['date'], 0, 7));
+
             return $transaction->load([
                 'coa:id,code,name,category_id',
                 'coa.category:id,name',
@@ -105,6 +107,8 @@ class TransactionService
                 'credit' => isset($data['credit']) ? round((float) $data['credit'], 2) : $locked->credit,
             ]);
 
+            DashboardSummaryService::clearCache(substr($locked->date, 0, 7));
+
             return $locked->load([
                 'coa:id,code,name,category_id',
                 'coa.category:id,name',
@@ -120,7 +124,10 @@ class TransactionService
         DB::transaction(function () use ($transaction) {
             /** @var Transaction $locked */
             $locked = Transaction::whereKey($transaction->id)->lockForUpdate()->firstOrFail();
+            $month = substr($locked->date, 0, 7);
             $locked->delete();
+
+            DashboardSummaryService::clearCache($month);
         });
     }
 }

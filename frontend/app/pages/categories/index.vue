@@ -3,7 +3,7 @@
     <div class="space-y-6">
       <!-- Header -->
       <PageHeader
-        title="Master Kategori"
+        title="Kategori"
         description="Kelola kategori kelompok transaksi (Salary, Other Income, Family Expense, dsb.)"
       >
         <template #actions>
