@@ -1,6 +1,5 @@
 <template>
-  <NuxtLayout>
-    <div class="space-y-6">
+  <div class="space-y-6">
       <!-- Header -->
       <PageHeader
         title="Kategori"
@@ -110,8 +109,7 @@
           </div>
         </form>
       </AppModal>
-    </div>
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">

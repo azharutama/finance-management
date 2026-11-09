@@ -1,5 +1,5 @@
 <template>
-  <div :class="['relative shrink-0', widthClass]">
+  <div :class="['relative shrink-0 w-full sm:w-auto', widthClass]">
     <select
       :value="modelValue"
       @change="onChange"

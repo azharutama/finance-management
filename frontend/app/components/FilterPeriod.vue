@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-wrap items-center gap-3">
+  <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
     <!-- Period Input Pill (Harmonis dengan FilterDateRange) -->
-    <div class="flex items-center gap-2 bg-slate-50 px-3.5 py-2 border border-slate-200 rounded-xl shrink-0 focus-within:bg-white focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/10 transition-all">
+    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 px-3.5 py-2 border border-slate-200 rounded-xl shrink-0 focus-within:bg-white focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/10 transition-all w-full sm:w-auto">
       <!-- Icon & Label Periode -->
       <div class="flex items-center gap-1.5 text-slate-400 select-none">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +67,7 @@
       @click="$emit('submit')"
       :disabled="loading"
       type="button"
-      class="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs shadow-sky-500/20 transition-all cursor-pointer flex items-center gap-1.5"
+      class="w-full sm:w-auto justify-center px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs shadow-sky-500/20 transition-all cursor-pointer flex items-center gap-1.5"
     >
       <svg v-if="loading" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

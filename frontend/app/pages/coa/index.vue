@@ -1,6 +1,5 @@
 <template>
-  <NuxtLayout>
-    <div class="space-y-6">
+  <div class="space-y-6">
       <!-- Header -->
       <PageHeader
         title="Chart of Account (COA)"
@@ -29,7 +28,7 @@
         <FilterSelect
           v-model="filterCategory"
           @change="fetchCoa(1)"
-          width-class="w-56"
+          width-class="w-full sm:w-56"
         >
           <option value="">Semua Kategori</option>
           <option v-for="cat in allCategories" :key="cat.id" :value="cat.id">
@@ -151,8 +150,7 @@
           </div>
         </form>
       </AppModal>
-    </div>
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">

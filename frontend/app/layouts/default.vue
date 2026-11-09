@@ -1,29 +1,54 @@
 <template>
-  <div class="min-h-screen bg-slate-50/70 flex">
-    <!-- Sidebar: Clean Light Style (White Background with Subtle Borders & Modern Blue/Orange Accents) -->
-    <aside class="w-64 bg-white border-r border-slate-200 text-slate-700 flex flex-col fixed inset-y-0 z-30 shadow-xs">
+  <div class="min-h-screen bg-slate-50/70 flex flex-col lg:flex-row">
+    <!-- Backdrop for Mobile Sidebar -->
+    <div
+      v-if="isMobileMenuOpen"
+      class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+      @click="isMobileMenuOpen = false"
+    ></div>
+
+    <!-- Sidebar: Clean Light Style (Responsive Drawer for Mobile, Fixed on Desktop) -->
+    <aside
+      class="w-64 bg-white border-r border-slate-200 text-slate-700 flex flex-col fixed inset-y-0 z-50 shadow-sm transition-transform duration-300 ease-in-out lg:translate-x-0"
+      :class="isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
+    >
       <!-- App Brand / Header -->
-      <div class="h-16 flex items-center px-6 gap-3 border-b border-slate-100 bg-white">
-        <!-- Logo with blue & orange dual tone -->
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-orange-500 p-0.5 shadow-sm flex items-center justify-center">
-          <div class="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
-            <span class="text-sky-600 font-extrabold text-xs">FM</span>
-            <span class="text-orange-500 font-black text-xs">.</span>
+      <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 bg-white">
+        <div class="flex items-center gap-3">
+          <!-- Logo with blue & orange dual tone -->
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-orange-500 p-0.5 shadow-sm flex items-center justify-center">
+            <div class="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
+              <span class="text-sky-600 font-extrabold text-xs">FM</span>
+              <span class="text-orange-500 font-black text-xs">.</span>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center text-sm font-extrabold tracking-tight">
+              <span class="text-sky-600">Finance</span>
+              <span class="text-orange-500">Management</span>
+            </div>
+            <p class="text-[10px] text-slate-400 font-medium">Accounting System</p>
           </div>
         </div>
-        <div>
-          <div class="flex items-center text-sm font-extrabold tracking-tight">
-            <span class="text-sky-600">Finance</span>
-            <span class="text-orange-500">Management</span>
-          </div>
-          <p class="text-[10px] text-slate-400 font-medium">Accounting System</p>
-        </div>
+
+        <!-- Close button on mobile -->
+        <button
+          @click="isMobileMenuOpen = false"
+          type="button"
+          class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+          aria-label="Tutup Menu"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <!-- Navigation Links -->
       <nav class="flex-1 px-3.5 py-6 space-y-1.5 overflow-y-auto">
         <NuxtLink
           to="/"
+          @click="isMobileMenuOpen = false"
           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group"
           :class="$route.path === '/' ? 'bg-sky-50 text-sky-700 font-bold border border-sky-100 shadow-xs' : 'hover:bg-slate-50 text-slate-600 hover:text-slate-900'"
         >
@@ -41,6 +66,7 @@
 
         <NuxtLink
           to="/transactions"
+          @click="isMobileMenuOpen = false"
           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group"
           :class="$route.path.startsWith('/transactions') ? 'bg-sky-50 text-sky-700 font-bold border border-sky-100 shadow-xs' : 'hover:bg-slate-50 text-slate-600 hover:text-slate-900'"
         >
@@ -58,6 +84,7 @@
 
         <NuxtLink
           to="/reports"
+          @click="isMobileMenuOpen = false"
           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group"
           :class="$route.path.startsWith('/reports') ? 'bg-sky-50 text-sky-700 font-bold border border-sky-100 shadow-xs' : 'hover:bg-slate-50 text-slate-600 hover:text-slate-900'"
         >
@@ -79,6 +106,7 @@
 
         <NuxtLink
           to="/categories"
+          @click="isMobileMenuOpen = false"
           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group"
           :class="$route.path.startsWith('/categories') ? 'bg-sky-50 text-sky-700 font-bold border border-sky-100 shadow-xs' : 'hover:bg-slate-50 text-slate-600 hover:text-slate-900'"
         >
@@ -96,6 +124,7 @@
 
         <NuxtLink
           to="/coa"
+          @click="isMobileMenuOpen = false"
           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group"
           :class="$route.path.startsWith('/coa') ? 'bg-sky-50 text-sky-700 font-bold border border-sky-100 shadow-xs' : 'hover:bg-slate-50 text-slate-600 hover:text-slate-900'"
         >
@@ -125,34 +154,36 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div class="flex-1 ml-64 flex flex-col min-w-0">
+    <div class="flex-1 lg:ml-64 flex flex-col min-w-0">
       <!-- Clean White Topbar -->
-      <header class="h-16 bg-white border-b border-slate-200/90 px-8 flex items-center justify-between sticky top-0 z-20 shadow-xs">
-        <!-- Search bar pill -->
-        <div class="flex items-center gap-3 w-80">
-          <div class="relative w-full">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </span>
-            <input
-              type="text"
-              readonly
-              placeholder="Cari menu, transaksi atau laporan..."
-              class="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-full text-slate-600 focus:outline-hidden cursor-default"
-            />
-          </div>
+      <header class="h-16 bg-white border-b border-slate-200/90 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+        <!-- Hamburger Menu Button for Mobile -->
+        <div class="flex items-center gap-3 flex-1 min-w-0 pr-2">
+          <button
+            @click="isMobileMenuOpen = true"
+            type="button"
+            class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer focus:outline-hidden"
+            aria-label="Buka Menu"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          <!-- Mobile App Title in Topbar -->
+          <span class="font-extrabold text-sm text-slate-800 tracking-tight sm:hidden truncate">
+            <span class="text-sky-600">Finance</span><span class="text-orange-500">.</span>
+          </span>
         </div>
 
         <!-- Topbar Right Items -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 shrink-0">
           <div class="flex items-center gap-2">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
+            <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
               Finance Admin
             </span>
 
-            <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-xs shadow-xs" title="Finance Admin">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -162,16 +193,16 @@
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 p-8">
+      <main class="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
         <slot />
       </main>
 
       <!-- Footer -->
-      <footer class="bg-white border-t border-slate-200/80 px-8 py-5 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div class="flex items-center gap-2 font-semibold">
+      <footer class="bg-white border-t border-slate-200/80 px-4 sm:px-8 py-5 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+        <div class="flex items-center gap-2 font-semibold justify-center sm:justify-start">
           <span class="text-sky-600 font-extrabold">Finance</span><span class="text-orange-500 font-black">Management</span>
           <span class="text-slate-300">|</span>
-          <span>Financial Management System</span>
+          <span class="hidden xs:inline">Financial Management System</span>
         </div>
         <div>
           &copy; {{ new Date().getFullYear() }} All Rights Reserved.
@@ -182,5 +213,11 @@
 </template>
 
 <script setup lang="ts">
-// Direct access without login
+const isMobileMenuOpen = ref(false);
+
+// Auto close mobile menu when route changes
+const route = useRoute();
+watch(() => route.fullPath, () => {
+  isMobileMenuOpen.value = false;
+});
 </script>

@@ -1,6 +1,5 @@
 <template>
-  <NuxtLayout>
-    <div class="space-y-6">
+  <div class="space-y-6">
       <!-- Modern Clean Carousel Hero -->
       <div class="relative bg-gradient-to-r from-sky-600 via-blue-600 to-sky-700 rounded-2xl p-6 text-white shadow-lg shadow-sky-600/10 overflow-hidden">
         <!-- Abstract gradient shapes -->
@@ -170,8 +169,7 @@
           </tbody>
         </table>
       </DataTableCard>
-    </div>
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">

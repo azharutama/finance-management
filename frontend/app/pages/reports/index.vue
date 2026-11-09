@@ -1,6 +1,5 @@
 <template>
-  <NuxtLayout>
-    <div class="space-y-6">
+  <div class="space-y-6">
       <!-- Header -->
       <PageHeader
         title="Laporan Profit & Loss"
@@ -169,8 +168,7 @@
           </tbody>
         </table>
       </DataTableCard>
-    </div>
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">

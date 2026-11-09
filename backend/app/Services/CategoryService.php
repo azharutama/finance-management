@@ -61,7 +61,7 @@ class CategoryService
 
             Cache::forget('categories:all');
 
-            return $category->loadCount('chartOfAccounts');
+            return $category;
         });
     }
 
@@ -80,7 +80,7 @@ class CategoryService
 
             Cache::forget('categories:all');
 
-            return $locked->loadCount('chartOfAccounts');
+            return $locked;
         });
     }
 

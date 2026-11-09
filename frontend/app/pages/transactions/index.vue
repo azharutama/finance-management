@@ -1,6 +1,5 @@
 <template>
-  <NuxtLayout>
-    <div class="space-y-6">
+  <div class="space-y-6">
       <!-- Header -->
       <PageHeader
         title="Daftar Transaksi"
@@ -29,7 +28,7 @@
         <FilterSelect
           v-model="filters.coa_id"
           @change="fetchTransactions(1)"
-          width-class="w-44"
+          width-class="w-full sm:w-44"
         >
           <option value="">Semua COA</option>
           <option v-for="c in coaOptions" :key="c.id" :value="c.id">
@@ -39,7 +38,7 @@
         <FilterSelect
           v-model="filters.category_id"
           @change="fetchTransactions(1)"
-          width-class="w-40"
+          width-class="w-full sm:w-40"
         >
           <option value="">Semua Kategori</option>
           <option v-for="cat in categoryOptions" :key="cat.id" :value="cat.id">
@@ -120,7 +119,7 @@
             {{ formError }}
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal *</label>
               <input
@@ -210,8 +209,7 @@
           </div>
         </form>
       </AppModal>
-    </div>
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
